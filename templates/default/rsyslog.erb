@@ -1,0 +1,8 @@
+# This file is maintained by Chef
+
+# This file is in RainerScript format, documented here:
+# http://www.rsyslog.com/doc/rscript_abnf.html
+# and mainly:
+# http://www.rsyslog.com/doc/rsyslog_conf_filter.html
+
+if $syslogfacility-text == "<%= node['haproxy']['syslog']['facility'] %>" and $programname == "haproxy" then /var/log/haproxy.log
