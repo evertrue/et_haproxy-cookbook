@@ -1,7 +1,7 @@
 # This file is maintained by chef
 
 global
-        log <%= node['haproxy']['syslog']['host'] %> <%= node['haproxy']['syslog']['facility'] %>
+        log <%= node['haproxy']['syslog']['dest'] %> <%= node['haproxy']['syslog']['facility'] %>
         maxconn <%= node['haproxy']['global']['maxconn'] %>
         #debug
         #quiet

@@ -5,4 +5,8 @@
 # and mainly:
 # http://www.rsyslog.com/doc/rsyslog_conf_filter.html
 
-if $syslogfacility-text == "<%= node['haproxy']['syslog']['facility'] %>" and $programname == "haproxy" then /var/log/haproxy.log
+if ( \
+  ($syslogfacility-text == '<%= node['haproxy']['syslog']['facility'] %>'') and \
+  ($programname == 'haproxy') \
+) \
+then /var/log/haproxy.log

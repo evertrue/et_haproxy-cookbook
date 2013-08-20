@@ -3,7 +3,7 @@
 # Recipe:: default
 #
 # Copyright (C) 2013 EverTrue, Inc.
-# 
+#
 # All rights reserved - Do Not Redistribute
 #
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
@@ -15,7 +15,7 @@ file "/etc/default/haproxy" do
   owner "root"
   group "root"
   mode 00644
-  content "# This file is managed by chef\n\n" + 
+  content "# This file is managed by chef\n\n" +
     "ENABLED=1"
 end
 
@@ -47,7 +47,11 @@ service "rsyslog" do
   action [ :nothing ]
 end
 
-template "/etc/rsyslog.d/haproxy" do
+file "/etc/rsyslog.d/haproxy" do
+  action :delete
+end
+
+template "/etc/rsyslog.d/30-haproxy.conf" do
   source "rsyslog.erb"
   owner "root"
   group "root"

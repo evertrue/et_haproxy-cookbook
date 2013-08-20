@@ -1,4 +1,4 @@
-default['haproxy']['syslog']['host'] = "127.0.0.1"
+default['haproxy']['syslog']['dest'] = "/dev/log"
 default['haproxy']['syslog']['facility'] = "local0"
 default['haproxy']['global']['maxconn'] = "100000"
 default['haproxy']['defaults']['timeout'] = {
