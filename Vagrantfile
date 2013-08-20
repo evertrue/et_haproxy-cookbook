@@ -70,17 +70,96 @@ Vagrant.configure("2") do |config|
   # to skip installing and copying to Vagrant's shelf.
   # config.berkshelf.except = []
 
+  config.vm.provision :shell, :inline => "curl -s -L https://www.opscode.com/chef/install.sh | sudo bash"
+
+  if ENV['CHEF_REPO']
+    chef_repo = ENV['CHEF_REPO']
+  else
+    raise "CHEF_REPO is not defined"
+  end
+
   config.vm.provision :chef_solo do |chef|
     chef.json = {
-      :mysql => {
-        :server_root_password => 'rootpass',
-        :server_debian_password => 'debpass',
-        :server_repl_password => 'replpass'
+      "chef_env_long_name" => "VAGRANT",
+      "haproxy" => {
+        "frontends" => {
+          "main" => {
+            "port" => "8080",
+            "ssl" => false,
+            "x_forwarded_for" => true,
+            "applications" => [
+              "app1",
+              "app2"
+            ]
+          },
+          "main_ssl" => {
+            "port" => "8443",
+            "ssl" => true,
+            "x_forwarded_for" => true,
+            "applications" => [
+              "app1",
+              "app2"
+            ]
+          }
+        },
+        "applications" => {
+          "app1" => {
+            "endpoint" => "app1.example.com",
+            "ssl_enabled" => true,
+            "ssl_required" => true,
+            "backend" => "app1"
+          },
+          "app2" => {
+            "endpoint" => "app2.example.com",
+            "ssl_enabled" => true,
+            "ssl_required" => true,
+            "backend" => "app2"
+          }
+        },
+        "backends" => {
+          "app1" => {
+            "balance_algorithm" => "roundrobin",
+            "check_req" => {
+              "method" => "OPTIONS",
+              "url" => "/"
+            },
+            "servers" => [
+              {
+                "name" => "app1",
+                "fqdn" => "169.254.0.1",
+                "port" => "8080",
+                "options" => [
+
+                ]
+              }
+            ]
+          },
+          "app2" => {
+            "balance_algorithm" => "roundrobin",
+            "check_req" => {
+              "method" => "OPTIONS",
+              "url" => "/"
+            },
+            "servers" => [
+              {
+                "name" => "app2",
+                "fqdn" => "169.254.0.2",
+                "port" => "8080",
+                "options" => [
+
+                ]
+              }
+            ]
+          }
+        }
       }
     }
+    chef.log_level = :debug
+    chef.data_bags_path = "#{chef_repo}/data_bags"
+    chef.encrypted_data_bag_secret_key_path = "#{ENV['HOME']}/.chef/encrypted_data_bag_secret"
 
     chef.run_list = [
-        "recipe[et_haproxy::default]"
+      "recipe[et_haproxy::default]"
     ]
   end
 end
