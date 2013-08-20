@@ -30,6 +30,7 @@ listen stats :<%= node['haproxy']['stats']['port'] %>
   stats uri <%= node['haproxy']['stats']['uri'] %>
   stats auth <%= node['haproxy']['stats']['admin_user'] %>:<%= node['haproxy']['stats']['admin_password'] %>
   monitor-uri <%= node['haproxy']['monitor_uri'] %>
+
 <% node['haproxy']['frontends'].each do |fe_name,fe_conf| -%>
 
 frontend <%= fe_name %> :<%= fe_conf['port'] %>
@@ -38,37 +39,58 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   option httpclose
   option forwardfor if-none
   capture request header X-Forwarded-For len 51
-  <% end -%>
+  <% end # fe_conf["x_forwarded_for"] -%>
+
+  <% if fe_conf["acls"] -%>
+  <% fe_conf["acls"].each do |acl,acl_conf| -%>
+  acl <%= acl %> <%= acl_conf %>
+  <% end # fe_conf["acls"].each -%>
+  <% end # if fe_conf["acls"] -%>
 
   # Endpoint acl definitions
   <% fe_conf['applications'].each do |app| -%>
-  acl host_<%= app %> hdr_beg(host) -i <%= node['haproxy']['applications'][app]['endpoint'] %>
-  <% end -%>
+  <% app_conf = node['haproxy']['applications'][app] -%>
+  <% if app_conf['endpoint'] -%>
+  acl host_<%= app %> hdr_beg(host) -i <%= app_conf['endpoint'] %>
+  <% end # if app_conf['endpoint'] -%>
+  <% end # fe_conf['applications'].each do |app| -%>
 
   <% unless fe_conf['ssl'] -%>
   # Forced SSL redirects
   <% fe_conf['applications'].each do |app| -%>
-  <% if node['haproxy']['applications'][app]['ssl_required'] -%>
-  redirect prefix https://<%= node['haproxy']['applications'][app]['endpoint'] %> if host_<%= app %>
+  <% app_conf = node['haproxy']['applications'][app] -%>
+  <% if app_conf['ssl_required'] -%>
+  <% if app_conf['endpoint'].class == String -%>
+  redirect prefix https://<%= app_conf['endpoint'] %> if host_<%= app %>
+  <% end # if app_conf['endpoint'] == String -%>
   <% end # if ssl_required -%>
-  <% end # .each -%>
+  <% end # fe_conf['applications'].each -%>
 
-  <% end # unless -%>
+  <% end # unless fe_conf['ssl'] -%>
   <% if fe_conf["ssl"] -%>
-  # This makes sure everything passed through this frontend leaves 
+  # This makes sure everything passed through this frontend leaves
   # with exactly one X-Forwarded-Proto header indicating, in this
   # case, "https".
   reqidel ^X-Forwarded-Proto:.*
   reqadd   X-Forwarded-Proto:\ https
 
-  <% end -%>
+  <% end # fe_conf["ssl"] -%>
   # use_backend rules
   <% fe_conf['applications'].each do |app| -%>
-  <% if ( fe_conf['ssl'] && node['haproxy']['applications'][app]['ssl_enabled'] ) || ( ! fe_conf['ssl'] && ! node['haproxy']['applications'][app]['ssl_required'] ) -%>
-  use_backend <%= node['haproxy']['applications'][app]['backend'] %> if host_<%= app %>
-  <% end -%>
-  <% end -%>
-<% end -%>
+  <% app_conf = node['haproxy']['applications'][app] -%>
+  <% if ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) || ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] ) -%>
+  <% if app_conf['endpoint'] -%>
+  use_backend <%= app_conf['backend'] %> if host_<%= app %>
+  <% end # if app_conf['endpoint'] -%>
+  <% #if app_conf['acls'] -%>
+
+  <% #end # if app_conf['acls'] -%>
+  <% end # ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) || ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] ) -%>
+  <% #if app_conf['acls'] -%>
+  <% #end # if app_conf['acls'] -%>
+  <% end # fe_conf['applications'].each -%>
+<% end # node['haproxy']['frontends'].each -%>
+
 <% node['haproxy']['backends'].each do |be_name,be_conf| -%>
 
 backend <%= be_name %>
@@ -77,15 +99,15 @@ backend <%= be_name %>
   option httpclose
   <% if be_conf["cookie_prefix"] -%>
   cookie <%= be_conf["cookie_prefix"] %> prefix
-  <% end -%>
+  <% end # if be_conf["cookie_prefix"] -%>
   <% if be_conf["cookie_insert"] -%>
   cookie <%= be_conf["cookie_insert"] %> insert indirect
-  <% end -%>
-  <% end -%>
+  <% end # if be_conf["cookie_insert"] -%>
+  <% end # unless be_conf['mode'] && be_conf['mode'] == "tcp" -%>
   <% if be_conf['check_req'] -%>
   option httpchk <%= be_conf['check_req']['method'] %> <%= be_conf['check_req']['url'] %>
-  <% end -%>
+  <% end # if be_conf['check_req'] -%>
   <% be_conf['servers'].each do |server| -%>
-  server <%= server['name'] %> <%= server['fqdn'] %>:<%= server['port'] %><% if be_conf['check_req'] %> check<% end %> <%= server['options'].join(' ') %> 
-  <% end -%>
-<% end -%>
+  server <%= server['name'] %> <%= server['fqdn'] %>:<%= server['port'] %><% if be_conf['check_req'] %> check<% end %> <%= server['options'].join(' ') %>
+  <% end # be_conf['servers'].each -%>
+<% end # node['haproxy']['backends'].each -%>
