@@ -82,72 +82,69 @@ Vagrant.configure("2") do |config|
     chef.json = {
       "chef_env_long_name" => "VAGRANT",
       "haproxy" => {
+        "acls" => {
+          "host_testhost1" => {
+            "type" => "hdr_beg(host)",
+            "match" => "testhost1.example.com"
+          },
+          "uri_testuri1" => {
+            "type" => "path_beg",
+            "match" => "/testuri1"
+          },
+          "uri_testuri2" => {
+            "type" => "path_beg",
+            "match" => "/testuri2"
+          }
+        },
         "frontends" => {
           "main" => {
             "port" => "8080",
-            "ssl" => false,
-            "x_forwarded_for" => true,
-            "applications" => [
-              "app1",
-              "app2"
-            ]
+            "ssl" => false
           },
           "main_ssl" => {
             "port" => "8443",
-            "ssl" => true,
-            "x_forwarded_for" => true,
-            "applications" => [
-              "app1",
-              "app2"
-            ]
+            "ssl" => true
           }
         },
         "applications" => {
-          "app1" => {
-            "endpoint" => "app1.example.com",
+          "testapi-stage" => {
+            "acls" => [ "host_testhost1", "uri_testuri1" ],
+            "endpoint" => "stage-testendpoint.example.com",
             "ssl_enabled" => true,
             "ssl_required" => true,
-            "backend" => "app1"
+            "backend" => "testapi-stage"
           },
-          "app2" => {
-            "endpoint" => "app2.example.com",
+          "testapi2-stage" => {
+            "acls" => [ "host_testhost1", "uri_testuri2" ],
             "ssl_enabled" => true,
             "ssl_required" => true,
-            "backend" => "app2"
+            "backend" => "test2api-stage"
           }
         },
         "backends" => {
-          "app1" => {
+          "testapi-stage" => {
             "balance_algorithm" => "roundrobin",
             "check_req" => {
-              "method" => "OPTIONS",
-              "url" => "/"
+              "always" => true
             },
             "servers" => [
               {
-                "name" => "app1",
+                "name" => "stage-test-api-1a",
                 "fqdn" => "169.254.0.1",
-                "port" => "8080",
-                "options" => [
-
-                ]
+                "port" => "8080"
               }
             ]
           },
-          "app2" => {
+          "test2api-stage" => {
             "balance_algorithm" => "roundrobin",
             "check_req" => {
-              "method" => "OPTIONS",
-              "url" => "/"
+              "always" => true
             },
             "servers" => [
               {
-                "name" => "app2",
+                "name" => "stage-test2-api-1a",
                 "fqdn" => "169.254.0.2",
-                "port" => "8080",
-                "options" => [
-
-                ]
+                "port" => "8080"
               }
             ]
           }
