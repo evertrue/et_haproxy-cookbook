@@ -1,3 +1,8 @@
+## 2.1.0:
+
+* Fixed how redirect fqdn's are printed
+* Made it possible to use negating (!) ACLs
+
 ## 2.0.1:
 
 * Enhanced ACL parsing

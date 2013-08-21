@@ -108,7 +108,7 @@ Vagrant.configure("2") do |config|
         },
         "applications" => {
           "testapi-stage" => {
-            "acls" => [ "host_testhost1", "uri_testuri1" ],
+            "acls" => [ "host_testhost1", "!uri_testuri1" ],
             "endpoint" => "stage-testendpoint.example.com",
             "ssl_enabled" => true,
             "ssl_required" => true,

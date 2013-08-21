@@ -85,9 +85,11 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
             # and using it in the redirect.  Note that it doesn't handle
             # the eventuality of regex-based ACLs very well at all.
 
-            app_endpoint_host = app_conf["acls"].select {|a|
-              node["haproxy"]["acls"][a]["type"] == "hdr_beg(host)"
+            app_endpoint_host_acl = app_conf["acls"].select {|a|
+              node["haproxy"]["acls"][a.sub(/^!/,'')]["type"] == "hdr_beg(host)"
             }.first
+
+            app_endpoint_host = node["haproxy"]["acls"][app_endpoint_host_acl]["match"]
   -%>
   redirect prefix https://<%= app_endpoint_host %> if <%= app_conf["acls"].join(' ') %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
   <%
