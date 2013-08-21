@@ -94,6 +94,10 @@ Vagrant.configure("2") do |config|
           "uri_testuri2" => {
             "type" => "path_beg",
             "match" => "/testuri2"
+          },
+          "uri_testuri3" => {
+            "type" => "path_beg",
+            "match" => "/testuri3"
           }
         },
         "frontends" => {
@@ -108,14 +112,17 @@ Vagrant.configure("2") do |config|
         },
         "applications" => {
           "testapi-stage" => {
-            "acls" => [ "host_testhost1", "!uri_testuri1" ],
+            "acls" => [ [ "host_testhost1", "!uri_testuri1" ] ],
             "endpoint" => "stage-testendpoint.example.com",
             "ssl_enabled" => true,
             "ssl_required" => true,
             "backend" => "testapi-stage"
           },
           "testapi2-stage" => {
-            "acls" => [ "host_testhost1", "uri_testuri2" ],
+            "acls" => [
+              [ "host_testhost1", "uri_testuri2" ],
+              [ "host_testhost1", "uri_testuri3" ]
+            ],
             "ssl_enabled" => true,
             "ssl_required" => true,
             "backend" => "test2api-stage"

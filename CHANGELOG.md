@@ -1,3 +1,7 @@
+## 2.2.0:
+
+* Allow for "or" ACL clauses
+
 ## 2.1.0:
 
 * Fixed how redirect fqdn's are printed
