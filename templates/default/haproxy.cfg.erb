@@ -116,7 +116,7 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
         if ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
           ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
   -%>
-  use_backend <%= app_conf['backend'] %> if <%= app_conf["acls"].join(' ') %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
+  use_backend <%= app_conf['backend'] %> if <%= app_conf["acls"].map{|a| a.join(' ') }.join(' or ') %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
   <%
         end # ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
        # ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
@@ -127,6 +127,17 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   -%>
 
 <%
+
+  # Only bother loading the node search if we are actually using it
+  # somewhere in the attributes.
+
+  unless node['api_haproxy']['backends'].select{|b,b_c| b_c["servers_recipe"]} == {}
+    recipe_servers = Chef::Recipe::EtHaproxy::nodes_for_recipes(
+        node.chef_environment,
+        node['haproxy']['backends']
+      )
+  end
+
   node['haproxy']['backends'].each do |be_name,be_conf|
 -%>
 
@@ -152,11 +163,31 @@ backend <%= be_name %>
     end # unless be_conf['mode'] && be_conf['mode'] == "tcp"
   -%>
   <%
-    be_conf['servers'].each do |server|
+    # List servers the old fashioned way (by individually defined server lines)
+    if be_conf['servers']
+      be_conf['servers'].each do |server|
   -%>
   server <%= server['name'] %> <%= server['fqdn'] %>:<%= server['port'] %><% if be_conf['check_req'] && be_conf['check_req']['always'] || be_conf['servers'].count > 1 %> check<% end %><% if server["options"] %> <%= server['options'].join(' ') %><% end %>
   <%
-    end # be_conf['servers'].each
+      end # be_conf['servers'].each
+    end # if be_conf['servers']
+
+    if be_conf['servers_recipe']
+      raise "In order to use the servers_recipe clause, you also need " +
+        "to define 'port' for the entire backend." unless be_conf["port"]
+      unless recipe_servers[be_conf['servers_recipe']] &&
+        recipe_servers[be_conf['servers_recipe']] != []
+        Chef::Log.warn "Recipe #{be_conf['servers_recipe']} does not " +
+          "appear to have any associated servers"
+      else # unless recipe_servers[be_conf['servers_recipe']]
+        cluster_servers = recipe_servers[be_conf['servers_recipe']]
+        cluster_servers.each do |server|
+  -%>
+  server <%= server.name %> <%= server['ipaddress'] %>:<%= be_conf['port'] %><% if be_conf['check_req'] && be_conf['check_req']['always'] || cluster_servers.count > 1 %> check<% end %><% if be_conf["server_options"] %> <%= be_conf['server_options'].join(' ') %><% end %>
+  <%
+        end # recipe_ips[be_conf['servers_recipe']].each
+      end # unless recipe_servers[be_conf['servers_recipe']]
+    end # if be_conf['servers_recipe']
   -%>
 <%
   end # node['haproxy']['backends'].each

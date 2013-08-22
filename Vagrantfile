@@ -1,5 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+Vagrant.require_plugin "vagrant-chef-zero"
 
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -70,7 +71,8 @@ Vagrant.configure("2") do |config|
   # to skip installing and copying to Vagrant's shelf.
   # config.berkshelf.except = []
 
-  config.vm.provision :shell, :inline => "curl -s -L https://www.opscode.com/chef/install.sh | sudo bash"
+  #config.vm.provision :shell, :inline => "curl -s -L https://www.opscode.com/chef/install.sh | sudo bash"
+  config.omnibus.chef_version = :latest
 
   if ENV['CHEF_REPO']
     chef_repo = ENV['CHEF_REPO']
@@ -78,90 +80,17 @@ Vagrant.configure("2") do |config|
     raise "CHEF_REPO is not defined"
   end
 
-  config.vm.provision :chef_solo do |chef|
-    chef.json = {
-      "chef_env_long_name" => "VAGRANT",
-      "haproxy" => {
-        "acls" => {
-          "host_testhost1" => {
-            "type" => "hdr_beg(host)",
-            "match" => "testhost1.example.com"
-          },
-          "uri_testuri1" => {
-            "type" => "path_beg",
-            "match" => "/testuri1"
-          },
-          "uri_testuri2" => {
-            "type" => "path_beg",
-            "match" => "/testuri2"
-          },
-          "uri_testuri3" => {
-            "type" => "path_beg",
-            "match" => "/testuri3"
-          }
-        },
-        "frontends" => {
-          "main" => {
-            "port" => "8080",
-            "ssl" => false
-          },
-          "main_ssl" => {
-            "port" => "8443",
-            "ssl" => true
-          }
-        },
-        "applications" => {
-          "testapi-stage" => {
-            "acls" => [ [ "host_testhost1", "!uri_testuri1" ] ],
-            "endpoint" => "stage-testendpoint.example.com",
-            "ssl_enabled" => true,
-            "ssl_required" => true,
-            "backend" => "testapi-stage"
-          },
-          "testapi2-stage" => {
-            "acls" => [
-              [ "host_testhost1", "uri_testuri2" ],
-              [ "host_testhost1", "uri_testuri3" ]
-            ],
-            "ssl_enabled" => true,
-            "ssl_required" => true,
-            "backend" => "test2api-stage"
-          }
-        },
-        "backends" => {
-          "testapi-stage" => {
-            "balance_algorithm" => "roundrobin",
-            "check_req" => {
-              "always" => true
-            },
-            "servers" => [
-              {
-                "name" => "stage-test-api-1a",
-                "fqdn" => "169.254.0.1",
-                "port" => "8080"
-              }
-            ]
-          },
-          "test2api-stage" => {
-            "balance_algorithm" => "roundrobin",
-            "check_req" => {
-              "always" => true
-            },
-            "servers" => [
-              {
-                "name" => "stage-test2-api-1a",
-                "fqdn" => "169.254.0.2",
-                "port" => "8080"
-              }
-            ]
-          }
-        }
-      }
-    }
-    chef.log_level = :debug
-    chef.data_bags_path = "#{chef_repo}/data_bags"
-    chef.encrypted_data_bag_secret_key_path = "#{ENV['HOME']}/.chef/encrypted_data_bag_secret"
+  config.chef_zero.chef_repo_path = ".chef-zero/"
 
+  #config.vm.provision :chef_solo do |chef|
+  #  chef.json = {}
+  #  chef.log_level = :debug
+  #  chef.data_bags_path = "#{chef_repo}/data_bags"
+  #  chef.encrypted_data_bag_secret_key_path = "#{ENV['HOME']}/.chef/encrypted_data_bag_secret"
+
+  config.vm.provision :chef_client do |chef|
+    chef.environment = "stage"
+    chef.log_level = :debug
     chef.run_list = [
       "recipe[et_haproxy::default]"
     ]

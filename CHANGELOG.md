@@ -1,3 +1,7 @@
+## 2.3.0:
+
+* Set up clusters using recipes with search
+
 ## 2.2.0:
 
 * Allow for "or" ACL clauses

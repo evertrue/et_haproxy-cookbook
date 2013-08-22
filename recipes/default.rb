@@ -8,6 +8,11 @@
 #
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+case node['platform_family']
+  when "debian"
+   include_recipe "apt"
+end
+
 package "haproxy"
 
 file "/etc/default/haproxy" do
