@@ -1,10 +1,22 @@
-## 2.3.0:
+## 2.3.1:
+
+* Fix versioning in changelog
+* Fix handling of target FQDN for SSL redirects
+* Broke out redirect list builder to a library function
+* Move syslog-config code to its own recipe
+* Fix broken reference to syslog recipe
+* Fix incorrect reference to "api_haproxy" in template
+
+## 2.3.0
 
 * Set up clusters using recipes with search
+* Add "or" ACL clauses to use_backend code (oops!)
+* Include `apt` recipe on Debian-family machines
 
 ## 2.2.0:
 
 * Allow for "or" ACL clauses
+* Fix a bug created by adding (!) to acl names
 
 ## 2.1.0:
 

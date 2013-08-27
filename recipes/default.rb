@@ -8,10 +8,14 @@
 #
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+node.set_unless['haproxy']['stats']['admin_password'] = secure_password
+
 case node['platform_family']
   when "debian"
    include_recipe "apt"
 end
+
+include_recipe "et_haproxy::syslog"
 
 package "haproxy"
 
@@ -29,8 +33,6 @@ service "haproxy" do
   action :enable
 end
 
-node.set_unless['haproxy']['stats']['admin_password'] = secure_password
-
 # This is necessary because haproxy's service command returns 0
 # even if the config file syntax is broken.
 execute "haproxy_config_verify" do
@@ -45,28 +47,4 @@ template "/etc/haproxy/haproxy.cfg" do
   mode 00644
   notifies :run, "execute[haproxy_config_verify]"
   notifies :reload, "service[haproxy]"
-end
-
-service "rsyslog" do
-  supports :status => true, :restart => true
-  action [ :nothing ]
-end
-
-file "/etc/rsyslog.d/haproxy" do
-  action :delete
-end
-
-template "/etc/rsyslog.d/30-haproxy.conf" do
-  source "rsyslog.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  notifies :restart, "service[rsyslog]"
-end
-
-cookbook_file "/etc/logrotate.d/haproxy" do
-  source "logrotate.conf"
-  owner "root"
-  group "root"
-  mode 00644
 end

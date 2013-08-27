@@ -78,24 +78,15 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   # Forced SSL redirects (if any)
   #
   <%
-        node['haproxy']['applications'].each do |app,app_conf|
-          if app_conf['ssl_required']
-
-            # Janky method of finding the actual hostname/fqdn of the request
-            # and using it in the redirect.  Note that it doesn't handle
-            # the eventuality of regex-based ACLs very well at all.
-
-            app_endpoint_host_acl = app_conf["acls"].flatten.select {|a|
-              a !~ /^!/ &&
-                node["haproxy"]["acls"][a]["type"] == "hdr_beg(host)"
-            }.first
-
-            app_endpoint_host = node["haproxy"]["acls"][app_endpoint_host_acl]["match"]
+        Chef::Recipe::EtHaproxy::gen_ssl_redirects(
+            node['haproxy']['applications'],
+            node['haproxy']['acls']
+          ).each do |ssl_redirect|
   -%>
-  redirect prefix https://<%= app_endpoint_host %> if <%= app_conf["acls"].map{|a| a.join(' ') }.join(' or ') %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
+  redirect prefix https://<%= ssl_redirect['fqdn'] %> if <%= ssl_redirect['acl'] %>
   <%
-          end # if ssl_required
-        end # node['haproxy']['applications'].each
+        end # ssl_redirects.uniq.each
+
       else # unless fe_conf['ssl']
   -%>
   # This makes sure everything passed through this frontend leaves
@@ -131,7 +122,7 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   # Only bother loading the node search if we are actually using it
   # somewhere in the attributes.
 
-  unless node['api_haproxy']['backends'].select{|b,b_c| b_c["servers_recipe"]} == {}
+  unless node['haproxy']['backends'].select{|b,b_c| b_c["servers_recipe"]} == {}
     recipe_servers = Chef::Recipe::EtHaproxy::nodes_for_recipes(
         node.chef_environment,
         node['haproxy']['backends']
