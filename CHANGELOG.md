@@ -1,3 +1,8 @@
+## 2.3.2:
+
+* [OPS-233] - Switch to logrotate_app resource to handle log rotation
+* [OPS-235] - Fix how redirect policies work for apps with multiple ACLs
+
 ## 2.3.1:
 
 * Fix versioning in changelog

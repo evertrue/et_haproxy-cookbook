@@ -42,14 +42,14 @@ class Chef::Recipe::EtHaproxy
         app_endpoint_host = acls[app_endpoint_host_acl]["match"]
 
         ssl_redirects << {
-          "acl" => app_endpoint_host_acl,
+          "acls" => app_conf["acls"],
           "fqdn" => app_endpoint_host
         }
 
         if app_conf["endpoint"]
 
           ssl_redirects << {
-            "acl" => "host_endpoint_#{app}",
+            "acls" => [["host_endpoint_#{app}"]],
             "fqdn" => app_conf["endpoint"]
           }
 

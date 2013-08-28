@@ -83,7 +83,7 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
             node['haproxy']['acls']
           ).each do |ssl_redirect|
   -%>
-  redirect prefix https://<%= ssl_redirect['fqdn'] %> if <%= ssl_redirect['acl'] %>
+  redirect prefix https://<%= ssl_redirect['fqdn'] %> if <%= ssl_redirect['acls'].map{|a| a.join(' ') }.join(' or ') %>
   <%
         end # ssl_redirects.uniq.each
 
