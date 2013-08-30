@@ -3,7 +3,11 @@ service "rsyslog" do
   action [ :nothing ]
 end
 
-template "/etc/rsyslog.d/30-haproxy.conf" do
+file "/etc/rsyslog.d/30-haproxy.conf" do
+  action :delete
+end
+
+template "/etc/rsyslog.d/99-haproxy.conf" do
   source "rsyslog.erb"
   owner "root"
   group "root"
