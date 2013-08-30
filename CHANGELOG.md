@@ -1,3 +1,7 @@
+## 2.3.3:
+
+* [OPS-238] - Change local syslog routing position from 30 to 99
+
 ## 2.3.2:
 
 * [OPS-233] - Switch to logrotate_app resource to handle log rotation
