@@ -30,7 +30,7 @@ end
 
 service "haproxy" do
   supports :restart => true, :status => true, :reload => true
-  action :enable
+  action [ :enable, :start ]
 end
 
 # This is necessary because haproxy's service command returns 0
@@ -47,4 +47,13 @@ template "/etc/haproxy/haproxy.cfg" do
   mode 00644
   notifies :run, "execute[haproxy_config_verify]"
   notifies :reload, "service[haproxy]"
+end
+
+package "socat"
+
+cookbook_file "/usr/bin/haproxyctl" do
+  source "haproxyctl"
+  owner "root"
+  group "root"
+  mode 00755
 end

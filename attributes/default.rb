@@ -1,6 +1,9 @@
 default['haproxy']['syslog']['dest'] = "/dev/log"
 default['haproxy']['syslog']['facility'] = "local0"
 default['haproxy']['global']['maxconn'] = "100000"
+default['haproxy']['global']['socket_file'] = "/var/run/haproxy.socket"
+default['haproxy']['global']['admin_user'] = "root"
+default['haproxy']['global']['admin_level'] = "operator"
 default['haproxy']['defaults']['timeout'] = {
   "connect" => "10000",
   "client" => "300000",

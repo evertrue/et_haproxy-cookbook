@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+socket_file=`grep "stats socket" /etc/haproxy/haproxy.cfg | \
+  awk '{print $3}'`
+
+if [ ! -S "${socket_file}" ]
+then
+
+  echo "Socket file ${socket_file} not found (or is not a socket).  Is haproxy running?"
+  exit 1
+
+elif [ ! -w "${socket_file}" ]
+then
+
+  echo "Socket file ${socket_file} is not writable"
+  exit 1
+
+fi
+
+echo "$@" | socat stdio "${socket_file}"

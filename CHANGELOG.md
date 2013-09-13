@@ -1,3 +1,7 @@
+## 2.4.0:
+
+* [OPS-252] - Provide a command to control haproxy from a shell command
+
 ## 2.3.3:
 
 * [OPS-238] - Change local syslog routing position from 30 to 99

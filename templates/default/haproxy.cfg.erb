@@ -7,6 +7,7 @@ global
   #quiet
   user haproxy
   group haproxy
+  stats socket <%= node['haproxy']['global']['socket_file'] %> user <%= node['haproxy']['global']['admin_user'] %> mode 0660 level <%= node['haproxy']['global']['admin_level'] %>
 
 defaults
   log     global
