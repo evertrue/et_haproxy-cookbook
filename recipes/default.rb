@@ -16,6 +16,7 @@ case node['platform_family']
 end
 
 include_recipe "et_haproxy::syslog"
+include_recipe "et_fog"
 
 package "haproxy"
 
@@ -45,6 +46,11 @@ template "/etc/haproxy/haproxy.cfg" do
   owner "root"
   group "root"
   mode 00644
+  variables(
+    :trusted_ips => Chef::Recipe::EtHaproxy::trusted_ips,
+    :eips => Chef::Recipe::EtHaproxy::eips(node['haproxy']['aws_api_user']),
+    :instance_ext_ips => Chef::Recipe::EtHaproxy::instance_ext_ips(node['haproxy']['aws_api_user'])
+  )
   notifies :run, "execute[haproxy_config_verify]"
   notifies :reload, "service[haproxy]"
 end

@@ -1,3 +1,7 @@
+## 2.5.0:
+
+* [OpsDev-93] - [Add access control](https://trello.com/c/OdklBNsV/93-add-access-control-to-haproxy "Trello")
+
 ## 2.4.0:
 
 * [OPS-252] - Provide a command to control haproxy from a shell command

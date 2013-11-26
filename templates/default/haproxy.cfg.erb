@@ -51,7 +51,20 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   # Endpoint acl definitions
   #
 
+  # Access Control acls
   <%
+      node['haproxy']['access_control']['sets'].each do |ac_set|
+  -%>
+  acl src_access_control_set_<%= ac_set %> hdr_ip(X-Forwarded-For) <%= @trusted_ips[ac_set].join(" ") %>
+  <%
+      end # node['haproxy']['access_control']['sets'].each do |ac_set|
+  -%>
+  acl src_access_control_eips hdr_ip(X-Forwarded-For) <%= @eips.join(" ") %>
+  acl src_access_control_instance_ext_ips hdr_ip(X-Forwarded-For) <%= @instance_ext_ips.join(" ") %>
+
+  # Statically defined acls
+  <%
+
       if node['haproxy']["acls"]
         node['haproxy']["acls"].each do |acl_name,acl_conf|
   -%>
@@ -60,8 +73,7 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
         end # node['haproxy']["acls"].each
       end # if node['haproxy']["acls"]
   -%>
-
-  # Old "host-only" endpoint acl definitions
+  # host-only endpoint acl definitions
   <%
       node["haproxy"]["applications"].select {|app,app_conf|
         app_conf["endpoint"]
@@ -69,6 +81,21 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
   -%>
   acl host_endpoint_<%= app %> hdr_beg(host) -i <%= app_conf["endpoint"] %>
   <%
+      end
+  -%>
+
+  # Block rules
+  <%
+      node['haproxy']['applications'].select { |app,app_conf|
+        app_conf["access_control"] && app_conf["allowed"]
+      }.each do |app,app_conf|
+
+        app_conf['acls'].each do |app_acls|
+          app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
+  -%>
+  block if <%= app_acls_w_blocks.join(' ') %>
+  <%
+        end
       end
   -%>
 
