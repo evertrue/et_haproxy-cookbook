@@ -1,3 +1,7 @@
+## 2.5.1:
+
+* [OpsDev-115] - [Add escaping to recipe search string.](https://trello.com/c/8ZyyIefd/115-recipe-search-in-et-haproxy-cookbook-doesn-t-work-if-cookbook-contains-a-colon "Trello")
+
 ## 2.5.0:
 
 * [OpsDev-93] - [Add access control](https://trello.com/c/OdklBNsV/93-add-access-control-to-haproxy "Trello")

@@ -75,7 +75,7 @@ class Chef::Recipe::EtHaproxy
       be_conf['servers_recipe']
     }
 
-    recipe_search_string = recipes.map{|r| "recipes:" + r }.join(' OR ')
+    recipe_search_string = recipes.map{|r| "recipes:" + r.gsub(':','\:') }.join(' OR ')
     clusters = Hash.new
     recipes.each do |rec|
       clusters[rec] = []
