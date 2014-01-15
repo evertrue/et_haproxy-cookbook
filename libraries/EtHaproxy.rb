@@ -97,6 +97,17 @@ class Chef::Recipe::EtHaproxy
     applications.each do |app,app_conf|
       if app_conf['ssl_required']
 
+        # The logic here is inverted so that we can keep 'false' as the default
+        # behavior instead of requiring that all applications specify this
+        # option.  It also helps make the template more readable.
+        if app_conf['ssl_disable_redirect']
+          Chef::Log.debug "App: #{app}, Redirect permitted: no"
+          redirect_permitted = false
+        else
+          Chef::Log.debug "App: #{app}, Redirect permitted: yes"
+          redirect_permitted = true
+        end
+
         # Janky method of finding the actual hostname/fqdn of the request
         # and using it in the redirect.  Note that it doesn't handle
         # the eventuality of regex-based ACLs very well at all.
@@ -110,14 +121,16 @@ class Chef::Recipe::EtHaproxy
 
         ssl_redirects << {
           "acls" => app_conf["acls"],
-          "fqdn" => app_endpoint_host
+          "fqdn" => app_endpoint_host,
+          'redirect_permitted' => redirect_permitted
         }
 
         if app_conf["endpoint"]
 
           ssl_redirects << {
             "acls" => [["host_endpoint_#{app}"]],
-            "fqdn" => app_conf["endpoint"]
+            "fqdn" => app_conf["endpoint"],
+            'redirect_permitted' => redirect_permitted
           }
 
         end # if app_conf["endpoint"]

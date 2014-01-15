@@ -1,3 +1,7 @@
+## 2.5.3:
+
+* Add "disable ssl redirect" functionality
+
 ## 2.5.2:
 
 * Bump et_fog 1.0.2

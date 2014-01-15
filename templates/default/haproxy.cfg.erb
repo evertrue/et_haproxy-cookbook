@@ -103,7 +103,7 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
       unless fe_conf['ssl']
   -%>
   #
-  # Forced SSL redirects (if any)
+  # Forced SSL redirects (if any) or blocks (if SSL redirect is disabled)
   #
   <%
         Chef::Recipe::EtHaproxy::gen_ssl_redirects(
@@ -111,7 +111,12 @@ frontend <%= fe_name %> :<%= fe_conf['port'] %>
             node['haproxy']['acls']
           ).each do |ssl_redirect|
   -%>
-  redirect prefix https://<%= ssl_redirect['fqdn'] %> if <%= ssl_redirect['acls'].map{|a| a.join(' ') }.join(' or ') %>
+  <% if ssl_redirect['redirect_permitted'] == true
+  %>redirect prefix https://<%= ssl_redirect['fqdn'] %><%
+     else
+  %>block<%
+     end
+  %> if <%= ssl_redirect['acls'].map{|a| a.join(' ') }.join(' or ') %>
   <%
         end # ssl_redirects.uniq.each
 
