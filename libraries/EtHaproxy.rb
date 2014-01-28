@@ -1,12 +1,12 @@
 class Chef::Recipe::EtHaproxy
 
-  def self.trusted_ips
+  def self.trusted_ips( trusted_network_obj )
 
     require 'ipaddress'
 
     ips = {}
 
-    Chef::DataBagItem.load("access_control","trusted_networks").each do |set,nets|
+    trusted_network_obj.each do |set,nets|
       if set != "id"
         ips[set] = [] if ! ips[set]
         nets.each do |n_obj|
@@ -26,6 +26,27 @@ class Chef::Recipe::EtHaproxy
     end
 
     return ips
+
+  end
+
+  def self.trusted_networks( trusted_network_obj )
+
+    networks = {}
+
+    trusted_network_obj.reject{|set,nets| set == 'id'}.each do |set,nets|
+      networks[set] = nets.map do |n_obj|
+        case n_obj
+        when String
+          n_obj
+        when Hash
+          n_obj['network']
+        else
+          raise "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
+        end
+      end
+    end
+
+    return networks
 
   end
 

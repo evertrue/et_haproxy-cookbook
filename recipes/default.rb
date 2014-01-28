@@ -41,13 +41,16 @@ execute "haproxy_config_verify" do
   action :nothing
 end
 
+trusted_networks_obj = Chef::DataBagItem.load("access_control","trusted_networks")
+
 template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
   owner "root"
   group "root"
   mode 00644
   variables(
-    :trusted_ips => Chef::Recipe::EtHaproxy::trusted_ips,
+    :trusted_networks => Chef::Recipe::EtHaproxy::trusted_networks( trusted_networks_obj ),
+    :trusted_ips => Chef::Recipe::EtHaproxy::trusted_ips( trusted_networks_obj ),
     :eips => Chef::Recipe::EtHaproxy::eips(node['haproxy']['aws_api_user']),
     :instance_ext_ips => Chef::Recipe::EtHaproxy::instance_ext_ips(node['haproxy']['aws_api_user'])
   )

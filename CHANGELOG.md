@@ -1,3 +1,8 @@
+## 2.5.4:
+
+* Split long lines of trusted IPs into multiple lines
+* Add true source IP check to trusted host ACL
+
 ## 2.5.3:
 
 * Add "disable ssl redirect" functionality
