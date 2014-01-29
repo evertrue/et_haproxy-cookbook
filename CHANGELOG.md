@@ -1,3 +1,7 @@
+## 2.5.5:
+
+* Match endpoint prefix hostnames
+
 ## 2.5.4:
 
 * Split long lines of trusted IPs into multiple lines

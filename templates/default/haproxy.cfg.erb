@@ -53,8 +53,8 @@ frontend <%= fe_name %>
         acl_conf['type'] == 'hdr_beg(host)'
       end.each do |acl,acl_conf|
       -%>
-      acl <%= acl %> <%= acl_conf['type'] %> <%= acl_conf['match'] %>
-      redirect prefix http://<%= acl_conf['match'] %>:<%= fe_conf['redirect_port'] %> if <%= acl %>
+      acl <%= acl %> <%= acl_conf['type'] %> <%= acl_conf['match'].split('.').first %>
+      redirect prefix http://<%= acl_conf['match'].split('.').first %>:<%= fe_conf['redirect_port'] %> if <%= acl %>
       <%
       end
 
@@ -100,7 +100,7 @@ frontend <%= fe_name %>
         if node['haproxy']["acls"]
           node['haproxy']["acls"].each do |acl_name,acl_conf|
   -%>
-  acl <%= acl_name %> <%= acl_conf['type'] %><% unless acl_conf['case_sensitive'] %> -i<% end %> <%= acl_conf['match'] %>
+  acl <%= acl_name %> <%= acl_conf['type'] %><% unless acl_conf['case_sensitive'] %> -i<% end %> <%= acl_conf['match'].split('.').first + ' ' if acl_conf['type'] =~ /hdr_.*(host)/ %><%= acl_conf['match'] %>
   <%
           end # node['haproxy']["acls"].each
         end # if node['haproxy']["acls"]
@@ -111,7 +111,7 @@ frontend <%= fe_name %>
           app_conf["endpoint"]
         }.each do |app,app_conf|
   -%>
-  acl host_endpoint_<%= app %> hdr_beg(host) -i <%= app_conf["endpoint"] %>
+  acl host_endpoint_<%= app %> hdr_beg(host) -i <%= app_conf['endpoint'].split('.').first %> <%= app_conf['endpoint'] %>
   <%
         end
   -%>
