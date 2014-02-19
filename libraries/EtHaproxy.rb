@@ -15,7 +15,7 @@ module EtHaproxy
             when Hash || Mash
               n = n_obj['network']
             else
-              raise "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
+              fail "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
             end
 
             ips[set] += IPAddress(n).map { |net|
@@ -39,7 +39,7 @@ module EtHaproxy
           when Hash || Mash
             n_obj['network']
           else
-            raise "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
+            fail "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
           end
         end
       end
