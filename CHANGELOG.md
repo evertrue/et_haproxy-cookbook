@@ -1,5 +1,6 @@
 ## 2.6.0
 
+* Make test kitchen work
 * Clean up library definitions for to make testing easier
 * Clean up library references (using include)
 * Pin logrotate at '>= 1.5.0'

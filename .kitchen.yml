@@ -2,26 +2,57 @@
 driver_plugin: vagrant
 driver_config:
   require_chef_omnibus: true
+provisioner:
+  name: chef_zero
+  environments_path: '.chef-zero/environments'
+  nodes_path: '.chef-zero/nodes'
+  data_bags_path: '.chef-zero/data_bags'
 
 platforms:
 - name: ubuntu-12.04
   driver_config:
+    customize:
+      cpus: 4
+      memory: 1536
+    network:
+      - [ 'private_network', {ip: '192.168.33.10'}]
     box: opscode-ubuntu-12.04
     box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box
-- name: ubuntu-10.04
-  driver_config:
-    box: opscode-ubuntu-10.04
-    box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-10.04_provisionerless.box
-- name: centos-6.4
-  driver_config:
-    box: opscode-centos-6.4
-    box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_centos-6.4_provisionerless.box
-- name: centos-5.9
-  driver_config:
-    box: opscode-centos-5.9
-    box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_centos-5.9_provisionerless.box
+
+# platforms:
+# - name: ubuntu-12.04
+#   driver:
+#     username: ubuntu
+#     image_id: ami-cf5e2ba6
+#     vm:
+#       provision:
+#         - ['shell', {inline: 'sudo mkdir -p /var/chef && sudo ln -sf /vagrant/.chef-repo/data_bags /var/chef/data_bags'}]
 
 suites:
 - name: default
-  run_list: ["recipe[et_haproxy]"]
-  attributes: {}
+  run_list: [
+    'recipe[nginx]',
+    'recipe[et_hostname]',
+    'recipe[et_haproxy]'
+  ]
+  encrypted_data_bag_secret_key_path: <%= ENV['HOME'] %>/.chef/encrypted_data_bag_secret
+  provisioner:
+    client_rb:
+      environment: 'stage'
+  attributes:
+    et_hostname:
+      addl_hosts_entries:
+        - 'stage-hadoop-nn-1b 1.2.3.4'
+        - 'stage-logs-1b 1.2.3.5'
+    nginx:
+      port: 8123
+  #     socketproxy:
+  #       root: '/usr/share/evertrue'
+  #       app_owner: 'nginx'
+  #       default_app: 'default'
+  #       apps:
+  #         default:
+  #           prepend_slash: false
+  #           context_name: ''
+  #           subdir: 'current'
+  #           socket:
