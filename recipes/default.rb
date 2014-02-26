@@ -8,6 +8,10 @@
 #
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+class ::Chef::Resource::Template
+  include ::EtHaproxy::Helpers
+end
+
 node.set_unless['haproxy']['stats']['admin_password'] = secure_password
 
 case node['platform_family']
@@ -19,6 +23,7 @@ include_recipe "et_haproxy::syslog"
 include_recipe "et_fog"
 
 package "haproxy"
+package 'curl' # for testing
 
 file "/etc/default/haproxy" do
   action :create
@@ -41,7 +46,7 @@ execute "haproxy_config_verify" do
   action :nothing
 end
 
-trusted_networks_obj = Chef::DataBagItem.load("access_control","trusted_networks")
+trusted_networks_obj = data_bag_item("access_control","trusted_networks")
 
 template "/etc/haproxy/haproxy.cfg" do
   source "haproxy.cfg.erb"
@@ -49,10 +54,10 @@ template "/etc/haproxy/haproxy.cfg" do
   group "root"
   mode 00644
   variables(
-    :trusted_networks => Chef::Recipe::EtHaproxy::trusted_networks( trusted_networks_obj ),
-    :trusted_ips => Chef::Recipe::EtHaproxy::trusted_ips( trusted_networks_obj ),
-    :eips => Chef::Recipe::EtHaproxy::eips(node['haproxy']['aws_api_user']),
-    :instance_ext_ips => Chef::Recipe::EtHaproxy::instance_ext_ips(node['haproxy']['aws_api_user'])
+    :trusted_networks => trusted_networks( trusted_networks_obj ),
+    :trusted_ips => trusted_ips( trusted_networks_obj ),
+    :eips => eips(node['haproxy']['aws_api_user']),
+    :instance_ext_ips => instance_ext_ips(node['haproxy']['aws_api_user'])
   )
   notifies :run, "execute[haproxy_config_verify]"
   notifies :reload, "service[haproxy]"

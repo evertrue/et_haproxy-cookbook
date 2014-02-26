@@ -1,3 +1,11 @@
+## 2.6.0
+
+* Clean up library definitions for to make testing easier
+* Clean up library references (using include)
+* Pin logrotate at '>= 1.5.0'
+* [platform-roadmap-15] - [Make backends optional in application definitions](https://trello.com/c/lwdLGnpU/15-app-token-lock-down "Trello")
+* Add warning for missing allow list when access_control is enabled
+
 ## 2.5.5:
 
 * Match endpoint prefix hostnames

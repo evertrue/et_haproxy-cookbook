@@ -1,5 +1,11 @@
 # This file is maintained by chef
 
+<%
+  class ::Chef::Mixin::Template::TemplateContext
+    include ::EtHaproxy::Helpers
+  end
+-%>
+
 global
   log <%= node['haproxy']['syslog']['dest'] %> <%= node['haproxy']['syslog']['facility'] %>
   maxconn <%= node['haproxy']['global']['maxconn'] %>
@@ -105,6 +111,7 @@ frontend <%= fe_name %>
           end # node['haproxy']["acls"].each
         end # if node['haproxy']["acls"]
   -%>
+
   # host-only endpoint acl definitions
   <%
         node["haproxy"]["applications"].select {|app,app_conf|
@@ -119,14 +126,18 @@ frontend <%= fe_name %>
   # Block rules
   <%
         node['haproxy']['applications'].select { |app,app_conf|
-          app_conf["access_control"] && app_conf["allowed"]
+          app_conf["access_control"]
         }.each do |app,app_conf|
-
-          app_conf['acls'].each do |app_acls|
-            app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
+          if app_conf["allowed"]
+            app_conf['acls'].each do |app_acls|
+              app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
   -%>
   block if <%= app_acls_w_blocks.join(' ') %>
   <%
+            end
+          else
+            Chef::Log.warn("Application #{app} has access_control: true but" +
+              " does not have an allow list")
           end
         end
   -%>
@@ -138,7 +149,7 @@ frontend <%= fe_name %>
   # Forced SSL redirects (if any) or blocks (if SSL redirect is disabled)
   #
   <%
-          Chef::Recipe::EtHaproxy::gen_ssl_redirects(
+          gen_ssl_redirects(
               node['haproxy']['applications'],
               node['haproxy']['acls']
             ).each do |ssl_redirect|
@@ -170,8 +181,9 @@ frontend <%= fe_name %>
   #
   <%
         node['haproxy']['applications'].each do |app,app_conf|
-          if ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
-            ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
+          if (( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
+            ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )) &&
+            app_conf['backend']
   -%>
   use_backend <%= app_conf['backend'] %> if <%= app_conf["acls"].map{|a| a.join(' ') }.join(' or ') %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
   <%
@@ -191,7 +203,7 @@ frontend <%= fe_name %>
   # somewhere in the attributes.
 
   unless node['haproxy']['backends'].select{|b,b_c| b_c["servers_recipe"]} == {}
-    recipe_servers = Chef::Recipe::EtHaproxy::nodes_for_recipes(
+    recipe_servers = nodes_for_recipes(
         node.chef_environment,
         node['haproxy']['backends']
       )
