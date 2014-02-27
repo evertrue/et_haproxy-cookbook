@@ -1,6 +1,10 @@
 module EtHaproxy
   module Helpers
 
+    def string_acls(acls)
+      acls.map{|a| a.join(' ') }.join(' or ')
+    end
+
     def trusted_ips( trusted_network_obj )
 
       require 'ipaddress'
@@ -112,7 +116,69 @@ module EtHaproxy
 
     end
 
-    def gen_ssl_redirects (applications,acls)
+    def server_line(conf, be_conf)
+      servername = conf.name || conf['name']
+      hostname = conf['ipaddress'] || conf['fqdn']
+      port = conf['port'] || be_conf['port']
+
+      output = "server #{servername} #{hostname}:#{port}"
+
+      if be_conf['check_req'] &&
+        be_conf['check_req']['always'] ||
+        (be_conf['servers_recipe'] &&
+          @recipe_servers[be_conf['servers_recipe']].count > 1)
+
+        output += ' check'
+      end
+
+      output += ' ' + conf['options'].join(' ') if conf['options']
+      output += ' ' + be_conf['server_options'].join(' ') if be_conf['server_options']
+
+      output
+    end
+
+    def backend_clause(name, conf)
+      lines = []
+      lines << 'backend ' + name
+      unless conf['mode'] && conf['mode'] == 'tcp'
+        lines << '  cookie ' + conf['cookie_prefix'] + ' prefix' if conf['cookie_prefix']
+        lines << '  cookie ' + conf['cookie_insert'] + ' insert indirect' if conf['cookie_insert']
+        if conf['check_req'] && conf['check_req']['method']
+          line = '  option httpchk ' + conf['check_req']['method']
+          line += ' ' + conf['check_req']['url'] if conf['check_req']['url']
+          lines << line
+        end
+      end
+
+      if conf['servers']
+        conf['servers'].each do |server|
+          lines << '  ' + server_line(
+            server,
+            conf
+          )
+        end
+      end
+
+      if conf['servers_recipe']
+        fail "In order to use the servers_recipe clause, you also need " +
+          "to define 'port' for the entire backend." unless conf["port"]
+        unless @recipe_servers[conf['servers_recipe']] &&
+          @recipe_servers[conf['servers_recipe']] != []
+          Chef::Log.warn "Recipe #{conf['servers_recipe']} does not " +
+            "appear to have any associated servers"
+        else
+          @recipe_servers[conf['servers_recipe']].each do |server|
+            lines << '  ' + server_line(
+              server,
+              conf
+            )
+          end
+        end
+      end
+      lines
+    end
+
+    def gen_ssl_redirects(applications,acls)
 
       ssl_redirects = Array.new
 
@@ -159,7 +225,16 @@ module EtHaproxy
         end # if ssl_required
       end # node['haproxy']['applications'].each
 
-      return ssl_redirects.uniq
+      ssl_redirects.uniq.map do |ssl_redirect|
+        output = ''
+        if ssl_redirect['redirect_permitted'] == true
+          output = 'redirect prefix https://' + ssl_redirect['fqdn']
+        else
+          output = 'block'
+        end
+        output += ' if ' + string_acls(ssl_redirect['acls'])
+        output
+      end
 
     end # def
 
