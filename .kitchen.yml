@@ -42,8 +42,9 @@ suites:
   attributes:
     et_hostname:
       addl_hosts_entries:
-        - 'stage-hadoop-nn-1b 1.2.3.4'
-        - 'stage-logs-1b 1.2.3.5'
+        - '10.4.0.2 stage-hadoop-nn-1b'
+        - '10.4.0.3 stage-logs-1b'
+        - '10.4.0.4 stage-api-1.priv.evertrue.com'
     nginx:
       port: 8123
   #     socketproxy:
