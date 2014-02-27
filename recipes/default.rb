@@ -6,6 +6,11 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+
+if Chef::VERSION < '11.10.4'
+  fail 'This recipe requires chef-client version 11.10.4 or higher'
+end
+
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 class ::Chef::Resource::Template
