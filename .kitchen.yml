@@ -1,7 +1,8 @@
 ---
-driver_plugin: vagrant
-driver_config:
+driver:
+  name: vagrant
   require_chef_omnibus: true
+
 provisioner:
   name: chef_zero
   environments_path: '.chef-zero/environments'
