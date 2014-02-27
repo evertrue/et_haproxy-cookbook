@@ -1,3 +1,4 @@
+# Encoding: utf-8
 #
 # Cookbook Name:: et_haproxy
 # Recipe:: default
@@ -7,12 +8,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
-if Chef::VERSION < '11.10.4'
-  fail 'This recipe requires chef-client version 11.10.4 or higher'
-end
+fail 'This recipe requires chef-client version 11.10.4 or higher' if Chef::VERSION < '11.10.4'
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+# Include helper code
 class ::Chef::Resource::Template
   include ::EtHaproxy::Helpers
 end

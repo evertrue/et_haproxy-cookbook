@@ -1,7 +1,8 @@
+# Encoding: utf-8
 require 'spec_helper'
 
 describe 'et_haproxy::default' do
-  let (:chef_run) do
+  let(:chef_run) do
     # This witchcraft allows us to use the include_recipe resource more than
     # once in a single recipe.
     @included_recipes = []
@@ -35,15 +36,14 @@ describe 'et_haproxy::default' do
         }
       ]
     }
-    Chef::EncryptedDataBagItem.stub(:load).with('secrets','aws_credentials').and_return(
-      {
-        'Ec2Haproxy' => {
-          'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
-          'secret_access_key' => 'SECRET_ACCESS_KEY'
-        }
+    Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'aws_credentials').and_return(
+      'Ec2Haproxy' => {
+        'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
+        'secret_access_key' => 'SECRET_ACCESS_KEY'
       }
     )
-    # Chef::Resource::Template.any_instance.stub(:trusted_networks).with(@trusted_networks_obj).and_return({
+    # Chef::Resource::Template.any_instance.stub(:trusted_networks).with(
+    #  @trusted_networks_obj).and_return({
     #     'global' => [
     #       '1.2.3.0/24',
     #       '192.168.0.0/24'
@@ -64,7 +64,7 @@ describe 'et_haproxy::default' do
     stub_data_bag('access_control').and_return([
       { id: 'trusted_networks' }
     ])
-    stub_data_bag_item('access_control','trusted_networks').and_return(@trusted_networks_obj)
+    stub_data_bag_item('access_control', 'trusted_networks').and_return(@trusted_networks_obj)
   end
 
   %w{
@@ -78,7 +78,8 @@ describe 'et_haproxy::default' do
 
   # describe 'trusted_ips' do
   #   it 'should return IPs' do
-  #     Chef::Resource::Template.any_instance.should_receive(:trusted_ips).with(@trusted_networks_obj).and_return(['127.0.0.1/24','192.168.19.0/24'])
+  #     Chef::Resource::Template.any_instance.should_receive(:trusted_ips).with(
+  #       @trusted_networks_obj).and_return(['127.0.0.1/24','192.168.19.0/24'])
   #   end
   # end
 
@@ -88,7 +89,8 @@ describe 'et_haproxy::default' do
   end
 
   it 'should render file /etc/default/haproxy' do
-    expect(chef_run).to render_file('/etc/default/haproxy').with_content("# This file is managed by chef\n\nENABLED=1")
+    expect(chef_run).to render_file('/etc/default/haproxy').with_content(
+      "# This file is managed by chef\n\nENABLED=1")
   end
 
   it 'should notify haproxy_config_verify to run and haproxy to reload' do
@@ -106,19 +108,19 @@ describe 'et_haproxy::default' do
 end
 
 describe EtHaproxy::Helpers do
-  let (:helpers){ Object.new.extend(EtHaproxy::Helpers) }
+  let(:helpers) { Object.new.extend(EtHaproxy::Helpers) }
   before do
     @fog_conn = Fog::Compute.new(
-      :provider => 'AWS',
-      :aws_access_key_id => 'MOCK_ACCESS_KEY',
-      :aws_secret_access_key => 'MOCK_SECRET_KEY'
+      provider: 'AWS',
+      aws_access_key_id: 'MOCK_ACCESS_KEY',
+      aws_secret_access_key: 'MOCK_SECRET_KEY'
     )
     @fog_conn.data[:limits][:addresses] = 25
     2.times do
       @fog_conn.allocate_address('vpc')
     end
 
-    @mock_eips = @fog_conn.addresses.map{|a| a.public_ip}
+    @mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
 
     Fog::Compute.any_instance.stub(:addresses).and_return(@fog_conn.addresses)
 
@@ -134,12 +136,10 @@ describe EtHaproxy::Helpers do
       ]
     }
 
-    Chef::EncryptedDataBagItem.stub(:load).with('secrets','aws_credentials').and_return(
-      {
-        'Ec2Haproxy' => {
-          'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
-          'secret_access_key' => 'SECRET_ACCESS_KEY'
-        }
+    Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'aws_credentials').and_return(
+      'Ec2Haproxy' => {
+        'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
+        'secret_access_key' => 'SECRET_ACCESS_KEY'
       }
     )
   end
@@ -147,19 +147,19 @@ describe EtHaproxy::Helpers do
     it 'should return a hash of IPs in an array under a set name' do
       helpers.trusted_ips(@trusted_networks_obj).should == {
         'global' => [
-          "127.0.0.0",
-          "127.0.0.1",
-          "127.0.0.2",
-          "127.0.0.3",
-          "192.168.19.0",
-          "192.168.19.1",
-          "192.168.19.2",
-          "192.168.19.3"
+          '127.0.0.0',
+          '127.0.0.1',
+          '127.0.0.2',
+          '127.0.0.3',
+          '192.168.19.0',
+          '192.168.19.1',
+          '192.168.19.2',
+          '192.168.19.3'
         ]
       }
     end
   end
-  describe "trusted_networks" do
+  describe 'trusted_networks' do
     it 'should return a hash of networks in an array under a set name' do
       helpers.trusted_networks(@trusted_networks_obj).should == {
         'global' => [
@@ -169,7 +169,7 @@ describe EtHaproxy::Helpers do
       }
     end
   end
-  describe "eips" do
+  describe 'eips' do
     it 'should return mock elastic IPs from AWS/Fog' do
       helpers.eips('Ec2Haproxy').should == @mock_eips
     end

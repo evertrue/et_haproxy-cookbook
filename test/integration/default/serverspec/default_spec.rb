@@ -1,3 +1,4 @@
+# Encoding: utf-8
 require 'spec_helper'
 
 describe 'HAProxy Service' do
@@ -41,9 +42,9 @@ describe 'HAProxy Service' do
   end
 end
 
-describe "HAProxy Configuration" do
+describe 'HAProxy Configuration' do
   describe command('curl ') do
-    it "does something" do
+    it 'does something' do
 
     end
   end

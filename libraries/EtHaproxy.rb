@@ -1,19 +1,20 @@
+# Encoding: utf-8
+# Helpers for the et_haproxy cookbook.
 module EtHaproxy
+  # Make the linter happy
   module Helpers
-
     def string_acls(acls)
-      acls.map{|a| a.join(' ') }.join(' or ')
+      acls.map { |a| a.join(' ') }.join(' or ')
     end
 
-    def trusted_ips( trusted_network_obj )
-
+    def trusted_ips(trusted_network_obj)
       require 'ipaddress'
 
       ips = {}
 
       trusted_network_obj.each do |set, nets|
         if set != 'id'
-          ips[set] = [] if !ips[set]
+          ips[set] = [] unless ips[set]
           nets.each do |n_obj|
             case n_obj
             when String
@@ -21,12 +22,11 @@ module EtHaproxy
             when Hash || Mash
               n = n_obj['network']
             else
-              fail "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
+              fail 'Unrecognized trusted network type: ' +
+                "#{n_obj.class}/#{n_obj.inspect}"
             end
 
-            ips[set] += IPAddress(n).map { |net|
-              net.address
-            }
+            ips[set] += IPAddress(n).map { |net| net.address }
           end
         end
       end
@@ -45,7 +45,8 @@ module EtHaproxy
           when Hash || Mash
             n_obj['network']
           else
-            fail "Unrecognized trusted network type: #{n_obj.class}/#{n_obj.inspect}"
+            fail 'Unrecognized trusted network type: ' +
+              "#{n_obj.class}/#{n_obj.inspect}"
           end
         end
       end
@@ -64,9 +65,7 @@ module EtHaproxy
         aws_secret_access_key: aws_keys['secret_access_key']
       )
 
-      conn.addresses.map { |a|
-        a.public_ip
-      }
+      conn.addresses.map { |a| a.public_ip }
     end
 
     def instance_ext_ips(aws_api_user)
@@ -80,19 +79,13 @@ module EtHaproxy
         aws_secret_access_key: aws_keys['secret_access_key']
       )
 
-      conn.servers.select{ |s|
-        s.public_ip_address
-      }.map{ |s|
-        s.public_ip_address
-      }
+      public_ip_servers = conn.servers.select { |s| s.public_ip_address }
+      public_ip_servers.map { |s| s.public_ip_address }
     end
 
     def nodes_for_recipes(env, backends)
-      recipes = backends.select { |be, be_conf|
-        be_conf['servers_recipe']
-      }.map { |be, be_conf|
-        be_conf['servers_recipe']
-      }
+      recipe_servers = backends.select { |be, be_conf| be_conf['servers_recipe'] }
+      recipes = recipe_servers.map { |be, be_conf| be_conf['servers_recipe'] }
 
       recipe_search_string = recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
 
@@ -102,7 +95,10 @@ module EtHaproxy
         clusters[rec] = []
       end
 
-      r = Chef::Search::Query.new.search(:node, "chef_environment:#{env} AND (#{recipe_search_string})").first
+      r = Chef::Search::Query.new.search(
+        :node,
+        "chef_environment:#{env} AND (#{recipe_search_string})"
+      ).first
 
       r.each do |n|
         cluster_recipe = (recipes & n.recipes).first
@@ -110,6 +106,68 @@ module EtHaproxy
       end
 
       clusters
+    end
+
+    def server_line(conf, be_conf)
+      servername = conf.name || conf['name']
+      hostname = conf['ipaddress'] || conf['fqdn']
+      port = conf['port'] || be_conf['port']
+
+      output = "server #{servername} #{hostname}:#{port}"
+
+      if be_conf['check_req'] &&
+        be_conf['check_req']['always'] ||
+        (be_conf['servers_recipe'] &&
+          @recipe_servers[be_conf['servers_recipe']].count > 1)
+
+        output += ' check'
+      end
+
+      output += ' ' + conf['options'].join(' ') if conf['options']
+      output += ' ' + be_conf['server_options'].join(' ') if be_conf['server_options']
+
+      output
+    end
+
+    def backend_clause(name, conf)
+      lines = []
+      lines << 'backend ' + name
+      unless conf['mode'] && conf['mode'] == 'tcp'
+        lines << '  cookie ' + conf['cookie_prefix'] + ' prefix' if conf['cookie_prefix']
+        lines << '  cookie ' + conf['cookie_insert'] + ' insert indirect' if conf['cookie_insert']
+        if conf['check_req'] && conf['check_req']['method']
+          line = '  option httpchk ' + conf['check_req']['method']
+          line += ' ' + conf['check_req']['url'] if conf['check_req']['url']
+          lines << line
+        end
+      end
+
+      if conf['servers']
+        conf['servers'].each do |server|
+          lines << '  ' + server_line(
+            server,
+            conf
+          )
+        end
+      end
+
+      if conf['servers_recipe']
+        fail 'In order to use the servers_recipe clause, you also need ' \
+          "to define 'port' for the entire backend." unless conf['port']
+        if ! (@recipe_servers[conf['servers_recipe']] &&
+          @recipe_servers[conf['servers_recipe']] != [])
+          @recipe_servers[conf['servers_recipe']].each do |server|
+            lines << '  ' + server_line(
+              server,
+              conf
+            )
+          end
+        else
+          Chef::Log.warn "Recipe #{conf['servers_recipe']} does not " +
+            'appear to have any associated servers'
+        end
+      end
+      lines
     end
 
     def gen_ssl_redirects(applications, acls)
@@ -133,10 +191,10 @@ module EtHaproxy
           # and using it in the redirect.  Note that it doesn't handle
           # the eventuality of regex-based ACLs very well at all.
 
-          app_endpoint_host_acl = app_conf['acls'].flatten.select { |a|
+          app_endpoint_host_acl = app_conf['acls'].flatten.select do |a|
             a !~ /^!/ &&
               acls[a]['type'] == 'hdr_beg(host)'
-          }.first
+          end.first
 
           app_endpoint_host = acls[app_endpoint_host_acl]['match']
 
@@ -156,7 +214,11 @@ module EtHaproxy
         end # if ssl_required
       end # node['haproxy']['applications'].each
 
-      ssl_redirects.uniq.map do |ssl_redirect|
+      ssl_redirect_lines(ssl_redirects.uniq)
+    end
+
+    def ssl_redirect_lines(redirects)
+      redirects.map do |ssl_redirect|
         output = ''
         if ssl_redirect['redirect_permitted'] == true
           output = 'redirect prefix https://' + ssl_redirect['fqdn']
@@ -166,7 +228,6 @@ module EtHaproxy
         output += ' if ' + string_acls(ssl_redirect['acls'])
         output
       end
-
     end # def
   end
 end
