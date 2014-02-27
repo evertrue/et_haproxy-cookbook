@@ -1,3 +1,10 @@
+## 2.7.0
+
+* Add redirect capability to applications
+* Move some ruby code in the template to the helper library (server and backend directives as well as some redirect code)
+* Add chef-client 11.10.4 version constraint
+* Fix RuboCop compliance
+
 ## 2.6.0
 
 * Make test kitchen work
