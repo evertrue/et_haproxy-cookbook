@@ -154,8 +154,8 @@ module EtHaproxy
       if conf['servers_recipe']
         fail 'In order to use the servers_recipe clause, you also need ' \
           "to define 'port' for the entire backend." unless conf['port']
-        if ! (@recipe_servers[conf['servers_recipe']] &&
-          @recipe_servers[conf['servers_recipe']] != [])
+        if @recipe_servers[conf['servers_recipe']] &&
+          @recipe_servers[conf['servers_recipe']] != []
           @recipe_servers[conf['servers_recipe']].each do |server|
             lines << '  ' + server_line(
               server,

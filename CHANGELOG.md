@@ -1,3 +1,7 @@
+## 2.7.1
+
+* Delete some extraneous parenthesis to make the recipe-based servers appear
+
 ## 2.7.0
 
 * Add redirect capability to applications
