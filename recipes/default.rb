@@ -76,3 +76,5 @@ cookbook_file '/usr/bin/haproxyctl' do
   group 'root'
   mode 00755
 end
+
+include_recipe 'et_haproxy::stunnel'
