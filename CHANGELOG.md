@@ -1,3 +1,7 @@
+## 2.8.1
+
+* Add stunnel
+
 ## 2.7.1
 
 * Delete some extraneous parenthesis to make the recipe-based servers appear
