@@ -1,11 +1,17 @@
 source 'https://rubygems.org'
 
-gem 'chef', '>= 11.10.0'
-gem 'chef-zero'
-gem 'berkshelf'
-gem 'test-kitchen', :group => :integration
-gem 'kitchen-vagrant', :group => :integration
-gem 'rspec-mocks'
-gem 'rspec-core'
-gem 'chefspec'
-gem 'fog'
+group :test, :development do
+  gem 'rake'
+end
+
+group :test do
+  gem 'berkshelf',  '~> 2.0'
+  gem 'chefspec',   '~> 3.0'
+  gem 'foodcritic', '~> 3.0'
+  gem 'rubocop',    '~> 0.16'
+
+  gem 'test-kitchen',    '~> 1.1'
+  gem 'kitchen-vagrant', '~> 0.14'
+
+  gem 'fog', '~> 1.20'
+end
