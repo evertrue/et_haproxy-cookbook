@@ -41,6 +41,62 @@ suites:
     client_rb:
       environment: 'stage'
   attributes:
+    haproxy:
+      acls:
+        host_stage-api:
+          type: hdr_beg(host)
+          match: stage-api.evertrue.com
+        uri_10:
+          type: path_beg
+          match: "/1.0"
+        uri_01:
+          type: path_beg
+          match: "/0.1"
+        uri_ping:
+          type: path_beg
+          match: "/ping"
+        uri_docs:
+          type: path_beg
+          match: "/docs"
+        uri_tools:
+          type: path_beg
+          match: "/tools"
+      frontends:
+        main:
+          ports:
+          - '80'
+          - '8080'
+          ssl: false
+        main_ssl:
+          port: '8443'
+          ports:
+          - '8443'
+          ssl: true
+      applications:
+        legacyapi-stage:
+          acls:
+          - - host_stage-api
+            - uri_10
+          - - host_stage-api
+            - uri_01
+          - - host_stage-api
+            - uri_ping
+          - - host_stage-api
+            - uri_docs
+          - - host_stage-api
+            - uri_tools
+          ssl_enabled: true
+          ssl_required: true
+          backend: legacyapi-stage
+      backends:
+        legacyapi-stage:
+          balance_algorithm: roundrobin
+          check_req:
+            always: true
+          servers:
+          - name: stage-api-1
+            fqdn: stage-api-1.priv.evertrue.com
+            port: '8080'
     et_hostname:
       addl_hosts_entries:
         - '10.4.0.2 stage-hadoop-nn-1b'
