@@ -1,3 +1,8 @@
+## 2.9.0
+
+* Add whitelisting of Pingdom API to globally-allowed IPs
+    * Allows for tighter security for some internal-only APIs (e.g., Search), without preventing Pingdom from monitoring our systems
+
 ## 2.8.0
 
 * Add stunnel
