@@ -1,3 +1,7 @@
+## 2.9.3
+
+* Tiny typo fix or error files source name
+
 ## 2.9.2
 
 * Add headers to 403 error message files, change their location, and fix their line terminators.

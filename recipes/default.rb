@@ -76,7 +76,7 @@ directory '/etc/haproxy/custom-errorfiles' do
 end
 
 cookbook_file '/etc/haproxy/custom-errorfiles/403.http' do
-  source 'custom-errorsfiles/403.http'
+  source 'custom-errorfiles/403.http'
   owner  'root'
   group  'root'
   mode   0644
