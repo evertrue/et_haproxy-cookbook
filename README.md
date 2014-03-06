@@ -168,6 +168,10 @@ These define the haproxy "backends" (obviously).  These are generally server clu
   </tr>
 </table>
 
+# Additional gotchas
+
+Be *VERY* careful editing the http error files.  They have a *mix* of LF and CRLF line terminators and it has to stay that way or some proxies and servers may experience hanging issues.
+
 # Author
 
 Author:: Eric Herot @ EverTrue, Inc. (<eric.herot@evertrue.com>)

@@ -1,3 +1,7 @@
+## 2.9.2
+
+* Add headers to 403 error message files, change their location, and fix their line terminators.
+
 ## 2.9.1
 
 * Add custom 403 error page

@@ -68,15 +68,15 @@ template '/etc/haproxy/haproxy.cfg' do
   notifies :reload, 'service[haproxy]'
 end
 
-directory '/etc/haproxy/errorfiles' do
+directory '/etc/haproxy/custom-errorfiles' do
   owner  'root'
   group  'root'
   mode   0755
   action :create
 end
 
-cookbook_file '/etc/haproxy/errorfiles/403.http' do
-  source 'errorfiles/403.http'
+cookbook_file '/etc/haproxy/custom-errorfiles/403.http' do
+  source 'custom-errorsfiles/403.http'
   owner  'root'
   group  'root'
   mode   0644
