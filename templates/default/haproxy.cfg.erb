@@ -144,6 +144,8 @@ frontend <%= fe_name %>
         unless fe_conf['ssl']
   -%>
 
+  errorfile 403 /etc/haproxy/errorfiles/403.http
+
   #
   # Forced SSL redirects (if any) or blocks (if SSL redirect is disabled)
   #
