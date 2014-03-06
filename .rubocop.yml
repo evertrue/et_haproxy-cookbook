@@ -1,3 +1,6 @@
+Encoding:
+  Enabled: false
+
 # The default 79 character limit is sometimes unproductive.
 LineLength:
   Max: 100
