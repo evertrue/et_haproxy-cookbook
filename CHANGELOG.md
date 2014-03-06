@@ -1,3 +1,7 @@
+## 2.9.1
+
+* Add custom 403 error page
+
 ## 2.9.0
 
 * Add whitelisting of Pingdom API to globally-allowed IPs
