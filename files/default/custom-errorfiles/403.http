@@ -1,5 +1,5 @@
 HTTP/1.0 403 Forbidden
-Cache-Contro: no-cache
+Cache-Control: no-cache
 Connection: close
 Content-Type: text/html
 

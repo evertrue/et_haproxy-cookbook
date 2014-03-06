@@ -1,3 +1,7 @@
+## 2.9.4
+
+* Fixed a typo in the header of the 403.http file itself
+
 ## 2.9.3
 
 * Tiny typo fix or error files source name
