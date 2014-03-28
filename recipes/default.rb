@@ -19,10 +19,7 @@ end
 
 node.set_unless['haproxy']['stats']['admin_password'] = secure_password
 
-case node['platform_family']
-when 'debian'
-  include_recipe 'apt'
-end
+include_recipe 'apt' if node['platform_family'] == 'debian'
 
 include_recipe 'et_haproxy::syslog'
 include_recipe 'et_fog'
