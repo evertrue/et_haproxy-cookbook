@@ -113,27 +113,6 @@ module EtHaproxy
       clusters
     end
 
-    def server_line(conf, be_conf)
-      servername = conf.name || conf['name']
-      hostname = conf['ipaddress'] || conf['fqdn']
-      port = conf['port'] || be_conf['port']
-
-      output = "server #{servername} #{hostname}:#{port}"
-
-      if be_conf['check_req'] &&
-        be_conf['check_req']['always'] ||
-        (be_conf['servers_recipe'] &&
-          @recipe_servers[be_conf['servers_recipe']].count > 1)
-
-        output += ' check'
-      end
-
-      output += ' ' + conf['options'].join(' ') if conf['options']
-      output += ' ' + be_conf['server_options'].join(' ') if be_conf['server_options']
-
-      output
-    end
-
     def backend_clause(name, conf)
       lines = []
       lines << 'backend ' + name
@@ -225,6 +204,8 @@ module EtHaproxy
       ssl_redirect_lines(ssl_redirects.uniq)
     end
 
+    private
+
     def ssl_redirect_lines(redirects)
       redirects.map do |ssl_redirect|
         output = ''
@@ -238,7 +219,26 @@ module EtHaproxy
       end
     end # def
 
-    private
+    def server_line(conf, be_conf)
+      servername = conf.name || conf['name']
+      hostname = conf['ipaddress'] || conf['fqdn']
+      port = conf['port'] || be_conf['port']
+
+      output = "server #{servername} #{hostname}:#{port}"
+
+      if be_conf['check_req'] &&
+        be_conf['check_req']['always'] ||
+        (be_conf['servers_recipe'] &&
+          @recipe_servers[be_conf['servers_recipe']].count > 1)
+
+        output += ' check'
+      end
+
+      output += ' ' + conf['options'].join(' ') if conf['options']
+      output += ' ' + be_conf['server_options'].join(' ') if be_conf['server_options']
+
+      output
+    end
 
     # Return an array of IPs from the Pingdom API response
     def pingdom_ips
