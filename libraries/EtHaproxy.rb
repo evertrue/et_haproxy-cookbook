@@ -10,6 +10,17 @@ module EtHaproxy
       end
     end
 
+    def recipe_servers
+      @recipe_servers ||= begin
+        recipe_servers = nodes_for_recipes(
+            node.chef_environment,
+            node['haproxy']['backends']
+          )
+        Chef::Log.info "recipe_servers inside: #{recipe_servers.inspect}"
+        recipe_servers
+      end
+    end
+
     def string_acls(acls)
       acls.map { |a| a.join(' ') }.join(' or ')
     end
@@ -95,31 +106,6 @@ module EtHaproxy
       public_ip_servers.map { |s| s.public_ip_address }
     end
 
-    def nodes_for_recipes(env, backends)
-      recipe_servers = backends.select { |be, be_conf| be_conf['servers_recipe'] }
-      recipes = recipe_servers.map { |be, be_conf| be_conf['servers_recipe'] }
-
-      recipe_search_string = recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
-
-      clusters = {}
-
-      recipes.each do |rec|
-        clusters[rec] = []
-      end
-
-      r = Chef::Search::Query.new.search(
-        :node,
-        "chef_environment:#{env} AND (#{recipe_search_string})"
-      ).first
-
-      r.each do |n|
-        cluster_recipe = (recipes & n.recipes).first
-        clusters[cluster_recipe] << n
-      end
-
-      clusters
-    end
-
     def backend_clause(name, conf)
       lines = []
       lines << 'backend ' + name
@@ -145,9 +131,9 @@ module EtHaproxy
       if conf['servers_recipe']
         fail 'In order to use the servers_recipe clause, you also need ' \
           "to define 'port' for the entire backend." unless conf['port']
-        if @recipe_servers[conf['servers_recipe']] &&
-          @recipe_servers[conf['servers_recipe']] != []
-          @recipe_servers[conf['servers_recipe']].each do |server|
+        if recipe_servers[conf['servers_recipe']] &&
+          recipe_servers[conf['servers_recipe']] != []
+          recipe_servers[conf['servers_recipe']].each do |server|
             lines << '  ' + server_line(
               server,
               conf
@@ -214,6 +200,41 @@ module EtHaproxy
 
     private
 
+    def nodes_for_recipes(env, backends)
+      Chef::Log.debug "In nodes_for_recipes with #{env}/#{backends.inspect}"
+
+      recipe_backends = backends.select { |be, be_conf| be_conf['servers_recipe'] }
+      Chef::Log.debug "In nodes_for_recipes: recipe_backends: #{recipe_backends.inspect}"
+
+      recipes = recipe_backends.map { |be, be_conf| be_conf['servers_recipe'] }
+      Chef::Log.debug "In nodes_for_recipes: recipes: #{recipes.join(', ')}"
+
+      recipe_search_string = recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
+      Chef::Log.debug "In nodes_for_recipes: search string: #{recipe_search_string}"
+
+      clusters = {}
+
+      recipes.each do |rec|
+        clusters[rec] = []
+      end
+
+      recipe_nodes = Chef::Search::Query.new.search(
+        :node,
+        "chef_environment:#{env} AND (#{recipe_search_string})"
+      ).first
+
+      Chef::Log.debug "In nodes_for_recipes search result: #{recipe_nodes.inspect}"
+
+      # Make a hash of servers and their associated recipes.
+      recipe_nodes.each do |n|
+        (recipes & n.recipes).each do |recipe|
+          clusters[recipe] << n
+        end
+      end
+
+      clusters
+    end
+
     def ssl_redirect_lines(redirects)
       redirects.map do |ssl_redirect|
         output = ''
@@ -237,7 +258,7 @@ module EtHaproxy
       if be_conf['check_req'] &&
         be_conf['check_req']['always'] ||
         (be_conf['servers_recipe'] &&
-          @recipe_servers[be_conf['servers_recipe']].count > 1)
+          recipe_servers[be_conf['servers_recipe']].count > 1)
 
         output += ' check'
       end

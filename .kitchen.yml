@@ -18,17 +18,9 @@ platforms:
     network:
       - - private_network
         - ip: '192.168.33.10'
-# platforms:
-# - name: ubuntu-12.04
-#   driver:
-#     username: ubuntu
-#     image_id: ami-cf5e2ba6
-#     vm:
-#       provision:
-#         - ['shell', {inline: 'sudo mkdir -p /var/chef && sudo ln -sf /vagrant/.chef-repo/data_bags /var/chef/data_bags'}]
 
 suites:
-- name: default
+- name: duplicate-servers
   run_list:
     - recipe[nginx]
     - recipe[et_hostname]
@@ -36,67 +28,96 @@ suites:
   attributes:
     haproxy:
       acls:
-        host_stage-api:
+        host_api:
           type: hdr_beg(host)
-          match: stage-api.evertrue.com
-        uri_10:
-          type: path_beg
-          match: "/1.0"
-        uri_01:
-          type: path_beg
-          match: "/0.1"
-        uri_ping:
-          type: path_beg
-          match: "/ping"
-        uri_docs:
-          type: path_beg
-          match: "/docs"
-        uri_tools:
-          type: path_beg
-          match: "/tools"
+          match: api.evertrue.com
       frontends:
         main:
           ports:
-          - '80'
           - '8080'
           ssl: false
-        main_ssl:
-          port: '8443'
-          ports:
-          - '8443'
-          ssl: true
       applications:
-        legacyapi-stage:
+        test-app:
           acls:
-          - - host_stage-api
-            - uri_10
-          - - host_stage-api
-            - uri_01
-          - - host_stage-api
-            - uri_ping
-          - - host_stage-api
-            - uri_docs
-          - - host_stage-api
-            - uri_tools
-          ssl_enabled: true
-          ssl_required: true
-          backend: legacyapi-stage
+          - - host_api
+          ssl_enabled: false
+        backend: be_a
       backends:
-        legacyapi-stage:
-          balance_algorithm: roundrobin
-          check_req:
-            always: true
-          servers:
-          - name: stage-api-1
-            fqdn: stage-api-1.priv.evertrue.com
-            port: '8080'
-    et_hostname:
-      addl_hosts_entries:
-        - 10.4.0.2 stage-hadoop-nn-1b
-        - 10.4.0.3 stage-logs-1b
-        - 10.4.0.4 stage-api-1.priv.evertrue.com
-    nginx:
-      port: 8123
+        be_a:
+          port: '8080'
+          servers_recipe: et_verify_app
+        be_b:
+          port: '8080'
+          servers_recipe: et_console_app
+# - name: default
+#   run_list:
+#     - recipe[nginx]
+#     - recipe[et_hostname]
+#     - recipe[et_haproxy]
+#   attributes:
+#     haproxy:
+#       acls:
+#         host_stage-api:
+#           type: hdr_beg(host)
+#           match: stage-api.evertrue.com
+#         uri_10:
+#           type: path_beg
+#           match: "/1.0"
+#         uri_01:
+#           type: path_beg
+#           match: "/0.1"
+#         uri_ping:
+#           type: path_beg
+#           match: "/ping"
+#         uri_docs:
+#           type: path_beg
+#           match: "/docs"
+#         uri_tools:
+#           type: path_beg
+#           match: "/tools"
+#       frontends:
+#         main:
+#           ports:
+#           - '80'
+#           - '8080'
+#           ssl: false
+#         main_ssl:
+#           port: '8443'
+#           ports:
+#           - '8443'
+#           ssl: true
+#       applications:
+#         legacyapi-stage:
+#           acls:
+#           - - host_stage-api
+#             - uri_10
+#           - - host_stage-api
+#             - uri_01
+#           - - host_stage-api
+#             - uri_ping
+#           - - host_stage-api
+#             - uri_docs
+#           - - host_stage-api
+#             - uri_tools
+#           ssl_enabled: true
+#           ssl_required: true
+#           backend: legacyapi-stage
+#       backends:
+#         legacyapi-stage:
+#           balance_algorithm: roundrobin
+#           check_req:
+#             always: true
+#           servers:
+#           - name: stage-api-1
+#             fqdn: stage-api-1.priv.evertrue.com
+#             port: '8080'
+#     et_hostname:
+#       addl_hosts_entries:
+#         - 10.4.0.2 stage-hadoop-nn-1b
+#         - 10.4.0.3 stage-logs-1b
+#         - 10.4.0.4 stage-api-1.priv.evertrue.com
+#     nginx:
+#       port: 8123
       # socketproxy:
       #   root: '/usr/share/evertrue'
       #   app_owner: 'nginx'

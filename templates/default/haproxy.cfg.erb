@@ -195,22 +195,9 @@ frontend <%= fe_name %>
       end # if fe_conf['vpn']
 
     end # node['haproxy']['frontends'].each
-  -%>
 
-<%
-
-  # Only bother loading the node search if we are actually using it
-  # somewhere in the attributes.
-
-  unless node['haproxy']['backends'].select{|b,b_c| b_c["servers_recipe"]} == {}
-    @recipe_servers = nodes_for_recipes(
-        node.chef_environment,
-        node['haproxy']['backends']
-      )
-  end
-
-  node['haproxy']['backends'].each do |be_name,be_conf|
-    backend_clause(be_name,be_conf).each do |line|
+    node['haproxy']['backends'].each do |be_name,be_conf|
+      backend_clause(be_name,be_conf).each do |line|
 -%>
 <%= line %>
 <%
