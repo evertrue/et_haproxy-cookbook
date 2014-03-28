@@ -3,6 +3,13 @@
 module EtHaproxy
   # Make the linter happy
   module Helpers
+    def self.validate(config)
+      %w{acls frontends applications backends}.each do |section|
+        fail "haproxy config missing section <#{section}>" unless config[section]
+        Chef::Log.info "Section #{section}: #{config[section].inspect}"
+      end
+    end
+
     def string_acls(acls)
       acls.map { |a| a.join(' ') }.join(' or ')
     end

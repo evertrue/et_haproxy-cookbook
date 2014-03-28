@@ -17,6 +17,8 @@ class ::Chef::Resource::Template
   include ::EtHaproxy::Helpers
 end
 
+::EtHaproxy::Helpers.validate node['haproxy']
+
 node.set_unless['haproxy']['stats']['admin_password'] = secure_password
 
 include_recipe 'apt' if node['platform_family'] == 'debian'
