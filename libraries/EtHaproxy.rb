@@ -198,6 +198,9 @@ module EtHaproxy
 
           app_endpoint_host_acl = app_conf['acls'].flatten.select do |a|
             a !~ /^!/ &&
+              # TODO: Handle other host matcher types besides hdr_beg.
+              # In fact, consider deprecating hdr_beg here because the
+              # only full hostnames are actually useful to us here.
               acls[a]['type'] == 'hdr_beg(host)'
           end.first
 
