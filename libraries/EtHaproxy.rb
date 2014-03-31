@@ -183,11 +183,12 @@ module EtHaproxy
           # the eventuality of regex-based ACLs very well at all.
 
           app_endpoint_host_acl = app_conf['acls'].flatten.select do |a|
+            Chef::Log.warn(
+              'gen_ssl_redirect does not fully support regular expressions ' \
+              'in hdr_reg(host)'
+            ) if acls[a]['type'] == 'hdr_reg(host)'
             a !~ /^!/ &&
-              # TODO: Handle other host matcher types besides hdr_beg.
-              # In fact, consider deprecating hdr_beg here because the
-              # only full hostnames are actually useful to us here.
-              acls[a]['type'] == 'hdr_beg(host)'
+              acls[a]['type'] =~ /hdr.*\(host\)/
           end.first
 
           app_endpoint_host = acls[app_endpoint_host_acl]['match']

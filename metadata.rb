@@ -4,7 +4,7 @@ maintainer_email 'eric.herot@evertrue.com'
 license          'All rights reserved'
 description      'Installs/Configures et_haproxy'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '2.9.4'
+version          '2.9.5'
 
 depends 'apt'
 depends 'openssl'

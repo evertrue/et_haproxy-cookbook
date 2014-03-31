@@ -1,3 +1,7 @@
+## 2.9.5
+
+* Handle host headers other than hdr_beg(host)
+
 ## 2.9.4
 
 * Fixed a typo in the header of the 403.http file itself
