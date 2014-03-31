@@ -172,7 +172,7 @@ module EtHaproxy
             Chef::Log.warn(
               'gen_ssl_redirect does not fully support regular expressions ' \
               'in hdr_reg(host)'
-            ) if acls[a]['type'] == 'hdr_reg(host)'
+            ) if acls[a] && acls[a]['type'] == 'hdr_reg(host)'
             a !~ /^!/ &&
               acls[a]['type'] =~ /hdr.*\(host\)/
           end.first

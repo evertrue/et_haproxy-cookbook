@@ -1,3 +1,7 @@
+## 2.9.7
+
+* Fix NPE in hdr_reg(host) warning logger
+
 ## 2.9.6
 
 * Allow GTE version for et_fog
