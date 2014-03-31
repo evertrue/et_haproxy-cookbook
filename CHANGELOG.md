@@ -1,3 +1,7 @@
+## 2.9.6
+
+* Allow GTE version for et_fog
+
 ## 2.9.5
 
 * Handle host headers other than hdr_beg(host)
