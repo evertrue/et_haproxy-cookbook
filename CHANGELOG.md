@@ -1,6 +1,14 @@
 ## 2.9.5
 
 * Handle host headers other than hdr_beg(host)
+* Stop assuming one-to-one recipe/server relationship and in the process clean up nodes for recipes code a bit and move it into private method
+* Add attribute validator
+* Linting cleanup
+* Move private methods to private methods section
+* Clean up kitchen yml file
+* local reference to et_hostname
+* Update Berksfile for berkshelf 3
+* Sanitize test data
 
 ## 2.9.4
 
