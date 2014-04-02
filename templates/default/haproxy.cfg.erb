@@ -27,7 +27,7 @@ defaults
   timeout client <%= node['haproxy']['defaults']['timeout']['client'] %>
   timeout server <%= node['haproxy']['defaults']['timeout']['server'] %>
   maxconn <%= node['haproxy']['defaults']['maxconn'] %>
-  <% if node["haproxy"]["x_forwarded_for"] -%>
+  <% if node['haproxy']['x_forwarded_for'] -%>
   option httpclose
   option forwardfor
   <% end -%>
@@ -66,7 +66,7 @@ frontend <%= fe_name %>
 
     else
 
-      unless fe_conf["disable_x_forwarded_for"]
+      unless fe_conf['disable_x_forwarded_for']
   -%>
   option forwardfor if-none
   capture request header X-Forwarded-For len 51
@@ -92,19 +92,19 @@ frontend <%= fe_name %>
         node['haproxy']['access_control']['sets'].each do |ac_set|
           @trusted_networks[ac_set].each_slice(max_line_length).each do |ip_slice|
   -%>
-  acl src_access_control_set_<%= ac_set %> src <%= ip_slice.join(" ") %>
+  acl src_access_control_set_<%= ac_set %> src <%= ip_slice.join(' ') %>
   <%
           end
         end # node['haproxy']['access_control']['sets'].each do |ac_set|
   -%>
-  acl src_access_control_eips hdr_ip(X-Forwarded-For) <%= @eips.sort.join(" ") %>
-  acl src_access_control_instance_ext_ips hdr_ip(X-Forwarded-For) <%= @instance_ext_ips.join(" ") %>
+  acl src_access_control_eips hdr_ip(X-Forwarded-For) <%= @eips.sort.join(' ') %>
+  acl src_access_control_instance_ext_ips hdr_ip(X-Forwarded-For) <%= @instance_ext_ips.join(' ') %>
 
   # Statically defined acls
   <%
 
-        if node['haproxy']["acls"]
-          node['haproxy']["acls"].each do |acl_name,acl_conf|
+        if node['haproxy']['acls']
+          node['haproxy']['acls'].each do |acl_name,acl_conf|
   -%>
   acl <%= acl_name %> <%= acl_conf['type'] %><% unless acl_conf['case_sensitive'] %> -i<% end %> <%= acl_conf['match'].split('.').first + ' ' if acl_conf['type'] =~ /hdr_.*(host)/ %><%= acl_conf['match'] %>
   <%
@@ -114,8 +114,8 @@ frontend <%= fe_name %>
 
   # host-only endpoint acl definitions
   <%
-        node["haproxy"]["applications"].select {|app,app_conf|
-          app_conf["endpoint"]
+        node['haproxy']['applications'].select {|app,app_conf|
+          app_conf['endpoint']
         }.each do |app,app_conf|
   -%>
   acl host_endpoint_<%= app %> hdr_beg(host) -i <%= app_conf['endpoint'].split('.').first %> <%= app_conf['endpoint'] %>
@@ -126,9 +126,9 @@ frontend <%= fe_name %>
   # Block rules
   <%
         node['haproxy']['applications'].select { |app,app_conf|
-          app_conf["access_control"]
+          app_conf['access_control']
         }.each do |app,app_conf|
-          if app_conf["allowed"]
+          if app_conf['allowed']
             app_conf['acls'].each do |app_acls|
               app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
   -%>
@@ -136,8 +136,8 @@ frontend <%= fe_name %>
   <%
             end
           else
-            Chef::Log.warn("Application #{app} has access_control: true but" +
-              " does not have an allow list")
+            Chef::Log.warn("Application #{app} has access_control: true but" \
+              ' does not have an allow list')
           end
         end
 
@@ -179,7 +179,7 @@ frontend <%= fe_name %>
             ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
             if app_conf['backend']
   -%>
-  use_backend <%= app_conf['backend'] %> if <%= string_acls(app_conf["acls"]) %><% if app_conf["endpoint"] %> or host_endpoint_<%= app %><% end %>
+  use_backend <%= app_conf['backend'] %> if <%= string_acls(app_conf['acls']) %><% if app_conf['endpoint'] %> or host_endpoint_<%= app %><% end %>
   <%
             elsif app_conf['redirect']
   -%>
