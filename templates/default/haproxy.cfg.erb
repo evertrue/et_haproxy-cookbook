@@ -131,6 +131,9 @@ frontend <%= fe_name %>
           if app_conf['allowed']
             app_conf['acls'].each do |app_acls|
               app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
+              app_acls_w_blocks += app_conf['allowed']['acls'].map { |a|
+                "!#{a}"
+              } if app_conf['allowed']['acls']
   -%>
   block if <%= app_acls_w_blocks.join(' ') %>
   <%
