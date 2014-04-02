@@ -1,3 +1,7 @@
+## 2.10.0
+
+* Add acl key type to application allowed attribute
+
 ## 2.9.7
 
 * Fix NPE in hdr_reg(host) warning logger
