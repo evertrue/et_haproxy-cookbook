@@ -170,7 +170,6 @@ frontend <%= fe_name %>
   <%
         end # fe_conf["ssl"]
   -%>
-
   #
   # routing rules (if any)
   #
@@ -195,7 +194,12 @@ frontend <%= fe_name %>
       end # if fe_conf['vpn']
 
     end # node['haproxy']['frontends'].each
+  -%>
 
+  #
+  # backend rules
+  #
+<%
     node['haproxy']['backends'].each do |be_name,be_conf|
       backend_clause(be_name,be_conf).each do |line|
 -%>
