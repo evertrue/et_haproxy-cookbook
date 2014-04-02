@@ -20,111 +20,83 @@ platforms:
         - ip: '192.168.33.10'
 
 suites:
-- name: duplicate-servers
+- name: default
   run_list:
     - recipe[nginx]
     - recipe[et_hostname]
     - recipe[et_haproxy]
   attributes:
+    et_hostname:
+      addl_hosts_entries:
+        - 10.4.0.2 stage-hadoop-nn-1b
+        - 10.4.0.3 stage-logs-1b
+        - 10.4.0.4 stage-api-1.priv.evertrue.com
+    nginx:
+      port: 8123
     haproxy:
       acls:
-        host_api:
+        host_stage-api:
           type: hdr_beg(host)
-          match: api.evertrue.com
+          match: stage-api.evertrue.com
+        uri_search:
+          type: path_beg
+          match: /search
       frontends:
+        vpn_fe:
+          vpn: true
+          ports:
+          - '8081'
+          redirect_port: '8443'
         main:
           ports:
+          - '80'
           - '8080'
           ssl: false
+        main_ssl:
+          port: '8443'
+          ports:
+          - '8443'
+          ssl: true
       applications:
-        test-app:
+        searchapi-stage:
           acls:
-          - - host_api
-          ssl_enabled: false
-        backend: be_a
+          - - host_stage-api
+            - uri_search
+          access_control: true
+          allowed:
+            host_groups:
+            - set_global
+            - eips
+            - instance_ext_ips
+          endpoint: stage-searchapi.evertrue.com
+          ssl_enabled: true
+          ssl_disable_redirect: true
+          ssl_required: true
+          backend: searchapi-stage
+        just-block:
+          acls:
+          - - hdr_etapptoken
+          - - uri_param_etapptoken
+          allowed:
+            host_groups:
+            - set_global
+            - eips
+            - instance_ext_ips
+          ssl_enabled: true
+          access_control: false
       backends:
-        be_a:
+        searchapi-stage:
+          balance_algorithm: roundrobin
+          check_req:
+            method: OPTIONS
+            url: /search/
           port: '8080'
-          servers_recipe: et_verify_app
-        be_b:
-          port: '8080'
-          servers_recipe: et_console_app
-# - name: default
-#   run_list:
-#     - recipe[nginx]
-#     - recipe[et_hostname]
-#     - recipe[et_haproxy]
-#   attributes:
-#     haproxy:
-#       acls:
-#         host_stage-api:
-#           type: hdr_beg(host)
-#           match: stage-api.evertrue.com
-#         uri_10:
-#           type: path_beg
-#           match: "/1.0"
-#         uri_01:
-#           type: path_beg
-#           match: "/0.1"
-#         uri_ping:
-#           type: path_beg
-#           match: "/ping"
-#         uri_docs:
-#           type: path_beg
-#           match: "/docs"
-#         uri_tools:
-#           type: path_beg
-#           match: "/tools"
-#       frontends:
-#         main:
-#           ports:
-#           - '80'
-#           - '8080'
-#           ssl: false
-#         main_ssl:
-#           port: '8443'
-#           ports:
-#           - '8443'
-#           ssl: true
-#       applications:
-#         legacyapi-stage:
-#           acls:
-#           - - host_stage-api
-#             - uri_10
-#           - - host_stage-api
-#             - uri_01
-#           - - host_stage-api
-#             - uri_ping
-#           - - host_stage-api
-#             - uri_docs
-#           - - host_stage-api
-#             - uri_tools
-#           ssl_enabled: true
-#           ssl_required: true
-#           backend: legacyapi-stage
-#       backends:
-#         legacyapi-stage:
-#           balance_algorithm: roundrobin
-#           check_req:
-#             always: true
-#           servers:
-#           - name: stage-api-1
-#             fqdn: stage-api-1.priv.evertrue.com
-#             port: '8080'
-#     et_hostname:
-#       addl_hosts_entries:
-#         - 10.4.0.2 stage-hadoop-nn-1b
-#         - 10.4.0.3 stage-logs-1b
-#         - 10.4.0.4 stage-api-1.priv.evertrue.com
-#     nginx:
-#       port: 8123
-      # socketproxy:
-      #   root: '/usr/share/evertrue'
-      #   app_owner: 'nginx'
-      #   default_app: 'default'
-      #   apps:
-      #     default:
-      #       prepend_slash: false
-      #       context_name: ''
-      #       subdir: 'current'
-      #       socket:
+          servers_recipe: et_search_api
+        legacyapi-stage:
+          balance_algorithm: roundrobin
+          check_req:
+            always: true
+          servers:
+          - name: stage-api-1
+            fqdn: stage-api-1.priv.evertrue.com
+            port: '8080'
