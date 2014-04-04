@@ -1,16 +1,24 @@
-## 2.10.0
+et_haproxy cookbook CHANGELOG
+============================
+This file is used to list changes made in each version of the et_haproxy cookbook.
+
+2.10.0
+------
 
 * Add acl key type to application allowed attribute
 
-## 2.9.7
+2.9.7
+-----
 
 * Fix NPE in hdr_reg(host) warning logger
 
-## 2.9.6
+2.9.6
+-----
 
 * Allow GTE version for et_fog
 
-## 2.9.5
+2.9.5
+-----
 
 * Handle host headers other than hdr_beg(host)
 * Stop assuming one-to-one recipe/server relationship and in the process clean up nodes for recipes code a bit and move it into private method
@@ -22,43 +30,52 @@
 * Update Berksfile for berkshelf 3
 * Sanitize test data
 
-## 2.9.4
+2.9.4
+-----
 
 * Fixed a typo in the header of the 403.http file itself
 
-## 2.9.3
+2.9.3
+-----
 
 * Tiny typo fix or error files source name
 
-## 2.9.2
+2.9.2
+-----
 
 * Add headers to 403 error message files, change their location, and fix their line terminators.
 
-## 2.9.1
+2.9.1
+-----
 
 * Add custom 403 error page
 
-## 2.9.0
+2.9.0
+-----
 
 * Add whitelisting of Pingdom API to globally-allowed IPs
     * Allows for tighter security for some internal-only APIs (e.g., Search), without preventing Pingdom from monitoring our systems
 
-## 2.8.0
+2.8.0
+-----
 
 * Add stunnel
 
-## 2.7.1
+2.7.1
+-----
 
 * Delete some extraneous parenthesis to make the recipe-based servers appear
 
-## 2.7.0
+2.7.0
+-----
 
 * Add redirect capability to applications
 * Move some ruby code in the template to the helper library (server and backend directives as well as some redirect code)
 * Add chef-client 11.10.4 version constraint
 * Fix RuboCop compliance
 
-## 2.6.0
+2.6.0
+-----
 
 * Make test kitchen work
 * Clean up library definitions for to make testing easier
@@ -67,45 +84,55 @@
 * [platform-roadmap-15] - [Make backends optional in application definitions](https://trello.com/c/lwdLGnpU/15-app-token-lock-down "Trello")
 * Add warning for missing allow list when access_control is enabled
 
-## 2.5.5:
+2.5.5:
+------
 
 * Match endpoint prefix hostnames
 
-## 2.5.4:
+2.5.4:
+------
 
 * Split long lines of trusted IPs into multiple lines
 * Add true source IP check to trusted host ACL
 
-## 2.5.3:
+2.5.3:
+------
 
 * Add "disable ssl redirect" functionality
 
-## 2.5.2:
+2.5.2:
+------
 
 * Bump et_fog 1.0.2
 
-## 2.5.1:
+2.5.1:
+------
 
 * [OpsDev-115] - [Add escaping to recipe search string.](https://trello.com/c/8ZyyIefd/115-recipe-search-in-et-haproxy-cookbook-doesn-t-work-if-cookbook-contains-a-colon "Trello")
 
-## 2.5.0:
+2.5.0:
+------
 
 * [OpsDev-93] - [Add access control](https://trello.com/c/OdklBNsV/93-add-access-control-to-haproxy "Trello")
 
-## 2.4.0:
+2.4.0:
+------
 
 * [OPS-252] - Provide a command to control haproxy from a shell command
 
-## 2.3.3:
+2.3.3:
+------
 
 * [OPS-238] - Change local syslog routing position from 30 to 99
 
-## 2.3.2:
+2.3.2:
+------
 
 * [OPS-233] - Switch to logrotate_app resource to handle log rotation
 * [OPS-235] - Fix how redirect policies work for apps with multiple ACLs
 
-## 2.3.1:
+2.3.1:
+------
 
 * Fix versioning in changelog
 * Fix handling of target FQDN for SSL redirects
@@ -114,32 +141,38 @@
 * Fix broken reference to syslog recipe
 * Fix incorrect reference to "api_haproxy" in template
 
-## 2.3.0
+2.3.0
+-----
 
 * Set up clusters using recipes with search
 * Add "or" ACL clauses to use_backend code (oops!)
 * Include `apt` recipe on Debian-family machines
 
-## 2.2.0:
+2.2.0:
+------
 
 * Allow for "or" ACL clauses
 * Fix a bug created by adding (!) to acl names
 
-## 2.1.0:
+2.1.0:
+------
 
 * Fixed how redirect fqdn's are printed
 * Made it possible to use negating (!) ACLs
 
-## 2.0.1:
+2.0.1:
+------
 
 * Enhanced ACL parsing
 * Removed some config attribute redundancy
 
-## 1.0.3:
+1.0.3:
+------
 
 * Don't log haproxy messages to the regular syslog
 
-## 1.0.2:
+1.0.2:
+------
 
 * Added changelog
 * Fixed syslog integration
