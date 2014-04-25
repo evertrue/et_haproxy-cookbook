@@ -2,6 +2,10 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v2.11.1
+-------
+* s/operator/admin/ for socket control user
+
 v2.11.0
 -------
 * Add New Relic monitoring of HAProxy via the MeetMe Plugin Agent
