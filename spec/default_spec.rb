@@ -14,7 +14,7 @@ describe 'et_haproxy::default' do
     Chef::RunContext.any_instance.stub(:loaded_recipes).and_return(@included_recipes)
 
     ChefSpec::Runner.new do |node|
-      node.set['api_haproxy'] = {
+      node.set['haproxy'] = {
         'acls' => {},
         'frontends' => {},
         'applications' => {},
