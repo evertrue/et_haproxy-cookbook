@@ -86,12 +86,7 @@ cookbook_file '/etc/haproxy/custom-errorfiles/403.http' do
 end
 
 package 'socat'
-
-cookbook_file '/usr/bin/haproxyctl' do
-  source 'haproxyctl'
-  owner 'root'
-  group 'root'
-  mode 00755
-end
+package 'ruby'
+gem_package 'haproxyctl'
 
 include_recipe 'et_haproxy::stunnel'

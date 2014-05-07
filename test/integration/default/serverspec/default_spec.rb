@@ -49,3 +49,13 @@ describe 'HAProxy Configuration' do
     end
   end
 end
+
+describe 'haproxyctl' do
+  describe package 'ruby' do
+    it { should be_installed }
+  end
+
+  describe package 'haproxyctl' do
+    it { should be_installed.by('gem') }
+  end
+end

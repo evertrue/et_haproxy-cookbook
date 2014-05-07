@@ -89,10 +89,15 @@ describe 'et_haproxy::default' do
   %w(
     haproxy
     socat
+    ruby
   ).each do |pkg|
     it 'should install package #{pkg}' do
       expect(chef_run).to install_package(pkg).at_converge_time
     end
+  end
+
+  it 'should install haproxyctl' do
+    expect(chef_run).to install_gem_package('haproxyctl')
   end
 
   # describe 'trusted_ips' do
@@ -121,6 +126,7 @@ describe 'et_haproxy::default' do
   it 'should include the et_haproxy::syslog recipe' do
     chef_run.should include_recipe 'et_haproxy::syslog'
   end
+
   it 'should include the et_fog recipe' do
     chef_run.should include_recipe 'et_fog'
   end
@@ -162,6 +168,7 @@ describe EtHaproxy::Helpers do
       }
     )
   end
+
   describe 'trusted_ips' do
     it 'should return a hash of IPs in an array under a set name' do
       helpers.trusted_ips(@trusted_networks_obj).should == {
@@ -178,6 +185,7 @@ describe EtHaproxy::Helpers do
       }
     end
   end
+
   describe 'trusted_networks' do
     it 'should return a hash of networks in an array under a set name' do
       helpers.trusted_networks(@trusted_networks_obj).should == {
@@ -188,6 +196,7 @@ describe EtHaproxy::Helpers do
       }
     end
   end
+
   describe 'eips' do
     it 'should return mock elastic IPs from AWS/Fog' do
       helpers.eips('Ec2Haproxy').should == @mock_eips
