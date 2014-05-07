@@ -86,10 +86,10 @@ describe 'et_haproxy::default' do
     stub_data_bag_item('access_control', 'trusted_networks').and_return(@trusted_networks_obj)
   end
 
-  %w{
+  %w(
     haproxy
     socat
-  }.each do |pkg|
+  ).each do |pkg|
     it 'should install package #{pkg}' do
       expect(chef_run).to install_package(pkg).at_converge_time
     end

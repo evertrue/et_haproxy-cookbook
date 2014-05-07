@@ -12,9 +12,13 @@ fail 'This recipe requires chef-client version 11.10.4 or higher' if Chef::VERSI
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-# Include helper code
-class ::Chef::Resource::Template
-  include ::EtHaproxy::Helpers
+class ::Chef
+  class Resource
+    # Include helper code
+    class Template
+      include ::EtHaproxy::Helpers
+    end
+  end
 end
 
 ::EtHaproxy::Helpers.validate node['haproxy']
