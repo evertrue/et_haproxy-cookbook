@@ -2,6 +2,11 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v2.12.2 (2014-05-08)
+--------------------
+* Fix URL to et_hostname cookbook in Berksfile
+
+
 v2.12.1 (2014-05-08)
 --------------------
 * Install Ruby 1.9.x instead of Ruby 1.8.x
