@@ -25,6 +25,8 @@ describe 'et_haproxy::default' do
   end
   before do
     Fog.mock!
+    Fog::Mock.reset
+
     @trusted_networks_obj = {
       'id' => 'trusted_networks',
       'global' => [
@@ -135,6 +137,9 @@ end
 describe EtHaproxy::Helpers do
   let(:helpers) { Object.new.extend(EtHaproxy::Helpers) }
   before do
+    Fog.mock!
+    Fog::Mock.reset
+
     @fog_conn = Fog::Compute.new(
       provider: 'AWS',
       aws_access_key_id: 'MOCK_ACCESS_KEY',
