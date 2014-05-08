@@ -172,6 +172,14 @@ describe EtHaproxy::Helpers do
         'secret_access_key' => 'SECRET_ACCESS_KEY'
       }
     )
+
+    Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'api_keys').and_return(
+      'pingdom' => {
+        'user' => 'devops@evertrue.com',
+        'pass' => 'PASSWORD',
+        'app_key' => 'APP_KEY'
+      }
+    )
   end
 
   describe 'trusted_ips' do
