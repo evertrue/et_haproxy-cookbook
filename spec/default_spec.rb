@@ -150,9 +150,6 @@ describe EtHaproxy::Helpers do
       @fog_conn.allocate_address('vpc')
     end
 
-    @mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
-
-    Fog::Compute.any_instance.stub(:addresses).and_return(@fog_conn.addresses)
 
     @trusted_networks_obj = {
       'id' => 'trusted_networks',
@@ -168,8 +165,8 @@ describe EtHaproxy::Helpers do
 
     Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'aws_credentials').and_return(
       'Ec2Haproxy' => {
-        'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
-        'secret_access_key' => 'SECRET_ACCESS_KEY'
+        'access_key_id' => 'MOCK_ACCESS_KEY',
+        'secret_access_key' => 'MOCK_SECRET_KEY'
       }
     )
 
@@ -184,6 +181,8 @@ describe EtHaproxy::Helpers do
 
   describe 'trusted_ips' do
     it 'should return a hash of IPs in an array under a set name' do
+      Fog::Compute::AWS::Mock.any_instance.should_receive(:addresses).and_return(@fog_conn.addresses)
+
       helpers.trusted_ips(@trusted_networks_obj).should == {
         'global' => [
           '127.0.0.0',
@@ -212,7 +211,9 @@ describe EtHaproxy::Helpers do
 
   describe 'eips' do
     it 'should return mock elastic IPs from AWS/Fog' do
-      helpers.eips('Ec2Haproxy').should == @mock_eips
+      mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
+
+      helpers.eips('Ec2Haproxy').should == mock_eips
     end
   end
 end
