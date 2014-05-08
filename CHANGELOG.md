@@ -2,6 +2,11 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v2.12.1 (2014-05-08)
+--------------------
+* Install Ruby 1.9.x instead of Ruby 1.8.x
+
+
 v2.12.0 (2014-05-08)
 --------------------
 * Fix things up to use Berkshelf 3 properly
