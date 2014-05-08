@@ -150,6 +150,9 @@ describe EtHaproxy::Helpers do
       @fog_conn.allocate_address('vpc')
     end
 
+    helpers.stub(:pingdom_ips).and_return(
+      ['95.211.87.85', '204.152.200.42', '85.25.176.167']
+    )
 
     @trusted_networks_obj = {
       'id' => 'trusted_networks',
@@ -192,7 +195,11 @@ describe EtHaproxy::Helpers do
           '192.168.19.0',
           '192.168.19.1',
           '192.168.19.2',
-          '192.168.19.3'
+          '192.168.19.3',
+          # Pingdom IPs
+          '95.211.87.85',
+          '204.152.200.42',
+          '85.25.176.167'
         ]
       }
     end
