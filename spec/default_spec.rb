@@ -91,7 +91,7 @@ describe 'et_haproxy::default' do
   %w(
     haproxy
     socat
-    ruby
+    ruby1.9.1
   ).each do |pkg|
     it 'should install package #{pkg}' do
       expect(chef_run).to install_package(pkg).at_converge_time

@@ -51,7 +51,7 @@ describe 'HAProxy Configuration' do
 end
 
 describe 'haproxyctl' do
-  describe package 'ruby' do
+  describe package 'ruby1.9.1' do
     it { should be_installed }
   end
 
