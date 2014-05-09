@@ -1,10 +1,9 @@
 # Encoding: utf-8
-# Helpers for the et_haproxy cookbook.
 module EtHaproxy
   # Make the linter happy
   module Helpers
     def self.validate(config)
-      %w{acls frontends applications backends}.each do |section|
+      %w(acls frontends applications backends).each do |section|
         fail "haproxy config missing section <#{section}>" unless config[section]
         Chef::Log.info "Section #{section}: #{config[section].inspect}"
       end
@@ -40,7 +39,7 @@ module EtHaproxy
             when Hash || Mash
               n = n_obj['network']
             else
-              fail 'Unrecognized trusted network type: ' +
+              fail 'Unrecognized trusted network type: ' \
                 "#{n_obj.class}/#{n_obj.inspect}"
             end
 
@@ -60,7 +59,7 @@ module EtHaproxy
     def trusted_networks(trusted_network_obj)
       networks = {}
 
-      trusted_network_obj.reject { |set, nets| set == 'id' }.each do |set, nets|
+      trusted_network_obj.reject { |set, _nets| set == 'id' }.each do |set, nets|
         networks[set] = nets.map do |n_obj|
           case n_obj
           when String
@@ -68,7 +67,7 @@ module EtHaproxy
           when Hash || Mash
             n_obj['network']
           else
-            fail 'Unrecognized trusted network type: ' +
+            fail 'Unrecognized trusted network type: ' \
               "#{n_obj.class}/#{n_obj.inspect}"
           end
         end
@@ -140,7 +139,7 @@ module EtHaproxy
             )
           end
         else
-          Chef::Log.warn "Recipe #{conf['servers_recipe']} does not " +
+          Chef::Log.warn "Recipe #{conf['servers_recipe']} does not " \
             'appear to have any associated servers'
         end
       end
@@ -169,8 +168,8 @@ module EtHaproxy
           # the eventuality of regex-based ACLs very well at all.
 
           app_endpoint_host_acl = app_conf['acls'].flatten.select do |a|
-            Chef::Log.warn(
-              'gen_ssl_redirect does not fully support regular expressions ' \
+            fail(
+              'gen_ssl_redirect does not support regular expressions ' \
               'in hdr_reg(host)'
             ) if acls[a] && acls[a]['type'] == 'hdr_reg(host)'
             a !~ /^!/ &&
@@ -203,10 +202,10 @@ module EtHaproxy
     def nodes_for_recipes(env, backends)
       Chef::Log.debug "In nodes_for_recipes with #{env}/#{backends.inspect}"
 
-      recipe_backends = backends.select { |be, be_conf| be_conf['servers_recipe'] }
+      recipe_backends = backends.select { |_be, be_conf| be_conf['servers_recipe'] }
       Chef::Log.debug "In nodes_for_recipes: recipe_backends: #{recipe_backends.inspect}"
 
-      recipes = recipe_backends.map { |be, be_conf| be_conf['servers_recipe'] }
+      recipes = recipe_backends.map { |_be, be_conf| be_conf['servers_recipe'] }
       Chef::Log.debug "In nodes_for_recipes: recipes: #{recipes.join(', ')}"
 
       recipe_search_string = recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
