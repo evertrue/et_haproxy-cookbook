@@ -15,7 +15,7 @@ driver:
 
 provisioner:
   name: chef_zero
-  encrypted_data_bag_secret_key_path: <%= ENV['HOME'] %>/.chef/encrypted_data_bag_secret
+  encrypted_data_bag_secret_key_path: <%= ENV['HOME'] %>/encrypted_data_bag_secret
   client_rb:
     environment: dev
 
