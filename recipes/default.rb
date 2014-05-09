@@ -13,8 +13,12 @@ fail 'This recipe requires chef-client version 11.10.4 or higher' if Chef::VERSI
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 # Include helper code
-class ::Chef::Resource::Template
-  include ::EtHaproxy::Helpers
+class Chef
+  class Resource
+    class Template
+      include ::EtHaproxy::Helpers
+    end
+  end
 end
 
 ::EtHaproxy::Helpers.validate node['haproxy']
@@ -68,17 +72,17 @@ template '/etc/haproxy/haproxy.cfg' do
 end
 
 directory '/etc/haproxy/custom-errorfiles' do
-  owner  'root'
-  group  'root'
-  mode   0755
+  owner 'root'
+  group 'root'
+  mode 0755
   action :create
 end
 
 cookbook_file '/etc/haproxy/custom-errorfiles/403.http' do
   source 'custom-errorfiles/403.http'
-  owner  'root'
-  group  'root'
-  mode   0644
+  owner 'root'
+  group 'root'
+  mode 0644
 end
 
 package 'socat'
