@@ -14,7 +14,7 @@ describe 'et_haproxy::default' do
     Chef::RunContext.any_instance.stub(:loaded_recipes).and_return(@included_recipes)
 
     ChefSpec::Runner.new do |node|
-      node.set['api_haproxy'] = {
+      node.set['haproxy'] = {
         'acls' => {},
         'frontends' => {},
         'applications' => {},
@@ -25,6 +25,8 @@ describe 'et_haproxy::default' do
   end
   before do
     Fog.mock!
+    Fog::Mock.reset
+
     @trusted_networks_obj = {
       'id' => 'trusted_networks',
       'global' => [
@@ -86,13 +88,18 @@ describe 'et_haproxy::default' do
     stub_data_bag_item('access_control', 'trusted_networks').and_return(@trusted_networks_obj)
   end
 
-  %w{
+  %w(
     haproxy
     socat
-  }.each do |pkg|
+    ruby1.9.1
+  ).each do |pkg|
     it 'should install package #{pkg}' do
       expect(chef_run).to install_package(pkg).at_converge_time
     end
+  end
+
+  it 'should install haproxyctl' do
+    expect(chef_run).to install_gem_package('haproxyctl')
   end
 
   # describe 'trusted_ips' do
@@ -121,6 +128,7 @@ describe 'et_haproxy::default' do
   it 'should include the et_haproxy::syslog recipe' do
     chef_run.should include_recipe 'et_haproxy::syslog'
   end
+
   it 'should include the et_fog recipe' do
     chef_run.should include_recipe 'et_fog'
   end
@@ -129,6 +137,9 @@ end
 describe EtHaproxy::Helpers do
   let(:helpers) { Object.new.extend(EtHaproxy::Helpers) }
   before do
+    Fog.mock!
+    Fog::Mock.reset
+
     @fog_conn = Fog::Compute.new(
       provider: 'AWS',
       aws_access_key_id: 'MOCK_ACCESS_KEY',
@@ -139,9 +150,9 @@ describe EtHaproxy::Helpers do
       @fog_conn.allocate_address('vpc')
     end
 
-    @mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
-
-    Fog::Compute.any_instance.stub(:addresses).and_return(@fog_conn.addresses)
+    helpers.stub(:pingdom_ips).and_return(
+      ['95.211.87.85', '204.152.200.42', '85.25.176.167']
+    )
 
     @trusted_networks_obj = {
       'id' => 'trusted_networks',
@@ -157,13 +168,24 @@ describe EtHaproxy::Helpers do
 
     Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'aws_credentials').and_return(
       'Ec2Haproxy' => {
-        'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
-        'secret_access_key' => 'SECRET_ACCESS_KEY'
+        'access_key_id' => 'MOCK_ACCESS_KEY',
+        'secret_access_key' => 'MOCK_SECRET_KEY'
+      }
+    )
+
+    Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'api_keys').and_return(
+      'pingdom' => {
+        'user' => 'devops@evertrue.com',
+        'pass' => 'PASSWORD',
+        'app_key' => 'APP_KEY'
       }
     )
   end
+
   describe 'trusted_ips' do
     it 'should return a hash of IPs in an array under a set name' do
+      Fog::Compute::AWS::Mock.any_instance.should_receive(:addresses).and_return(@fog_conn.addresses)
+
       helpers.trusted_ips(@trusted_networks_obj).should == {
         'global' => [
           '127.0.0.0',
@@ -173,11 +195,16 @@ describe EtHaproxy::Helpers do
           '192.168.19.0',
           '192.168.19.1',
           '192.168.19.2',
-          '192.168.19.3'
+          '192.168.19.3',
+          # Pingdom IPs
+          '95.211.87.85',
+          '204.152.200.42',
+          '85.25.176.167'
         ]
       }
     end
   end
+
   describe 'trusted_networks' do
     it 'should return a hash of networks in an array under a set name' do
       helpers.trusted_networks(@trusted_networks_obj).should == {
@@ -188,9 +215,12 @@ describe EtHaproxy::Helpers do
       }
     end
   end
+
   describe 'eips' do
     it 'should return mock elastic IPs from AWS/Fog' do
-      helpers.eips('Ec2Haproxy').should == @mock_eips
+      mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
+
+      helpers.eips('Ec2Haproxy').should == mock_eips
     end
   end
 end

@@ -3,11 +3,15 @@ Encoding:
 
 # The default 79 character limit is sometimes unproductive.
 LineLength:
-  Max: 100
+  Max: 120
 
 # The default 10 lines limit is unrealistic.
 MethodLength:
   Max: 50
+
+# Lining up the attributes of some methods is advantageous for readability
+SingleSpaceBeforeFirstArg:
+  Enabled: false
   
 Documentation:
   Enabled: false

@@ -2,6 +2,27 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v2.12.2 (2014-05-08)
+--------------------
+* Fix URL to et_hostname cookbook in Berksfile
+
+
+v2.12.1 (2014-05-08)
+--------------------
+* Install Ruby 1.9.x instead of Ruby 1.8.x
+
+
+v2.12.0 (2014-05-08)
+--------------------
+* Fix things up to use Berkshelf 3 properly
+* Relax some Rubocop rules
+* Rubocop cleanup
+* Add missing cookbook dependency
+* Fix ChefSpec tests to work properly (so much Fog mocking madness)
+* Add installation of community [haproxyctl](https://github.com/flores/haproxyctl), which require Ruby
+    * Add ChefSpec & Serverspec tests for new `haproxyctl`
+
+
 v2.11.1
 -------
 * s/operator/admin/ for socket control user
