@@ -2,6 +2,13 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.0.0 (2014-05-09)
+-------------------
+* Do not allow hdr_reg to be used in a host ACL
+* Fix up test environment to support Travis-CI
+* Reduced cyclomatic complexity in the helper library (by making more a lot more functions, heh)
+* Added an ignore rule to rubocop for the ::Chef we're using in the default recipe
+
 v2.12.2 (2014-05-08)
 --------------------
 * Fix URL to et_hostname cookbook in Berksfile
