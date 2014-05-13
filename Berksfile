@@ -4,7 +4,7 @@ metadata
 
 cookbook 'et_fog',
          git: 'git@github.com:evertrue/et_fog-cookbook.git',
-         tag: 'v1.0.4'
+         tag: 'v1.0.5'
          # path: '../et_fog'
 cookbook 'et_nginx',
          git: 'git@github.com:evertrue/nginx-cookbook.git',
