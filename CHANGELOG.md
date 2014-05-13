@@ -2,6 +2,14 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.0.1 (2014-05-13)
+-------------------
+* Fix local Test Kitchen config w/r/t nginx
+* Use newer et_fog cookbook to fix issue w/ nokogiri dependency installation
+* Add `apt::defaul` to the Test Kitchen run list
+* Use HTTPS for talking to Berkshelf API server
+
+
 v3.0.0 (2014-05-09)
 -------------------
 * Do not allow hdr_reg to be used in a host ACL
