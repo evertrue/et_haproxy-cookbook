@@ -22,7 +22,8 @@ platforms:
 suites:
 - name: default
   run_list:
-    - recipe[et_nginx]
+    - recipe[apt::default]
+    - recipe[et_nginx::default]
     - recipe[et_hostname]
     - recipe[et_haproxy]
   attributes:
