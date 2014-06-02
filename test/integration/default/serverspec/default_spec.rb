@@ -74,4 +74,10 @@ describe 'haproxyctl' do
   describe package 'haproxyctl' do
     it { should be_installed.by('gem') }
   end
+
+  describe file '/etc/sudoers.d/control_haproxy' do
+    it { should be_file }
+    its(:content) { should include '/usr/local/bin/haproxyctl enable server *' }
+    its(:content) { should include '/usr/local/bin/haproxyctl disable server *' }
+  end
 end

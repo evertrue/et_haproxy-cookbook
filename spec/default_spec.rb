@@ -102,6 +102,10 @@ describe 'et_haproxy::default' do
     expect(chef_run).to install_gem_package('haproxyctl')
   end
 
+  it 'should add control_haproxy sudoer rules' do
+    expect(chef_run).to install_sudo('control_haproxy')
+  end
+
   # describe 'trusted_ips' do
   #   it 'should return IPs' do
   #     Chef::Resource::Template.any_instance.should_receive(:trusted_ips).with(

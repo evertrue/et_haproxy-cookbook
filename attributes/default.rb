@@ -20,3 +20,4 @@ default['haproxy']['stats'] = {
   'admin_user' => 'admin'
 }
 default['haproxy']['monitor_uri'] = '/status'
+set['authorization']['sudo']['include_sudoers_d'] = true

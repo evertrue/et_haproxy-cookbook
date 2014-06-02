@@ -89,4 +89,13 @@ package 'socat'
 package 'ruby1.9.1'
 gem_package 'haproxyctl'
 
+sudo 'control_haproxy' do
+  user 'deploy'
+  nopasswd true
+  commands([
+    '/usr/local/bin/haproxyctl enable server *',
+    '/usr/local/bin/haproxyctl disable server *'
+  ])
+end
+
 include_recipe 'et_haproxy::stunnel'

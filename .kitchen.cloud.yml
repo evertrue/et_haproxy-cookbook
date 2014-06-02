@@ -33,6 +33,7 @@ suites:
     - recipe[apt::default]
     - recipe[et_nginx::default]
     - recipe[et_hostname]
+    - recipe[et_users]
     - recipe[et_haproxy]
   attributes:
     et_hostname:
