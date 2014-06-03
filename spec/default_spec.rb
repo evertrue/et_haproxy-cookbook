@@ -21,7 +21,7 @@ describe 'et_haproxy::default' do
         'backends' => {}
       }
       node.set['platform_family'] = 'debian'
-    end.converge('et_haproxy::default')
+    end.converge(described_recipe)
   end
   before do
     Fog.mock!
