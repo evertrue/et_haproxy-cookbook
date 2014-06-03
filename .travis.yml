@@ -17,6 +17,8 @@ script:
 - KITCHEN_LOG=debug bundle exec rake travis
 after_script:
 - bundle exec kitchen destroy
+notifications:
+  slack: evertrue:aceK52JFVEqyEyA82bWk2GKY
 env:
   global:
   - secure: OXDAoHF2NZbWbiSeNingUPXW88DsUVbZ7wYyuTDr2u8w24pREpdHpS6YYIwY41EinaxQtq7AeobIH+9XNBPX9LViSeMgQYqjAMog+NpQT9aimoc73S8iZkoW9lN6fNVwJkTEYVnOLY7isEtcEOneFzUueZ/3pIX9hRVrrorsQHI=
@@ -85,5 +87,3 @@ env:
   - secure: lGowVCzMTi6qyO/8FNPWJCgWA2LL2VrSLWJX3N4NstSk5SysgmJgD0Dw0pozuTzaGEV41nOgvr8yNBytJ4Jo4bF5znOXEViYER+xvPIrgW2IQhjdHoprqkMc+cR1SdBJ3DfLYrkIbnYj1u+VnQAakYnDGLmHcEiJZDkWxMCShUs=
   - secure: c8uXU+g9GAKEfHyX5B0azjv8eqwoDUjEPMEIw8LfOc09hSk80/qXEGD9oQzRIAHhy1QfM4buUa+ufqRgQk//XEFasJMLlkYQHwlAyJiuWqbjcXfaTQPWOkFezv5+GvYlW4otI1zahu0PCyzEMwnSdnx3OzcQHXvSAGHEwzy02FI=
   - secure: HDgH52EQftMV1nF2hcciAF00nyB1InLW/OJoMTurwzW2Fq6pj22KhVc2Pq9zdObzVwMps8OIWtILMl/otUpfB88xCiVHLbKBNORm5Fcnn6/LGS8h5UO3f0Tb6gFib0Avf5rkaS5SbXk936kyzvWXacUzXm61dAm2kVknGHjO/fY=
-notifications:
-  slack: evertrue:aceK52JFVEqyEyA82bWk2GKY
