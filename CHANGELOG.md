@@ -2,6 +2,10 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.0.2 (2014-06-03)
+-------------------
+* Add SystemLogRateLimitBurst 800 to rsyslog template
+
 v3.0.1 (2014-05-13)
 -------------------
 * Fix local Test Kitchen config w/r/t nginx
