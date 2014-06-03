@@ -8,7 +8,7 @@ group :test do
   gem 'berkshelf',  '~> 3.0'
   gem 'chefspec',   '~> 3.0'
   gem 'foodcritic', '~> 3.0'
-  gem 'rubocop',    '~> 0.16'
+  gem 'rubocop',    '~> 0.23'
 
   gem 'test-kitchen',    '~> 1.1'
   gem 'kitchen-vagrant', '~> 0.14'
