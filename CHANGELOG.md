@@ -2,6 +2,16 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.1.0 (2014-06-04)
+-------------------
+
+* Add sudoer rules to allow control of HAProxy servers for zero downtime deployments
+* Ensure ChefSpec converges the correct recipe
+* Update RuboCop to v0.23.0
+* Use data_bags supplied w/ cookbook to provide for cloud testing via Travis
+* Match local TK config to cloud TK config
+
+
 v3.0.1 (2014-05-13)
 -------------------
 * Fix local Test Kitchen config w/r/t nginx
