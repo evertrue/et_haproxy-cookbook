@@ -30,21 +30,21 @@ module EtHaproxy
       ips = {}
 
       trusted_network_obj.each do |set, nets|
-        if set != 'id'
-          ips[set] = [] unless ips[set]
-          nets.each do |n_obj|
-            case n_obj
-            when String
-              n = n_obj
-            when Hash || Mash
-              n = n_obj['network']
-            else
-              fail 'Unrecognized trusted network type: ' \
-                "#{n_obj.class}/#{n_obj.inspect}"
-            end
+        next unless set != 'id'
 
-            ips[set] += IPAddress(n).map { |net| net.address }
+        ips[set] = [] unless ips[set]
+        nets.each do |n_obj|
+          case n_obj
+          when String
+            n = n_obj
+          when Hash || Mash
+            n = n_obj['network']
+          else
+            fail 'Unrecognized trusted network type: ' \
+              "#{n_obj.class}/#{n_obj.inspect}"
           end
+
+          ips[set] += IPAddress(n).map { |net| net.address }
         end
       end
 
@@ -176,35 +176,34 @@ module EtHaproxy
       ssl_redirects = []
 
       applications.each do |app, app_conf|
-        if app_conf['ssl_required']
+        next unless app_conf['ssl_required']
 
-          # The logic here is inverted so that we can keep 'false' as the default
-          # behavior instead of requiring that all applications specify this
-          # option.  It also helps make the template more readable.
-          if app_conf['ssl_disable_redirect']
-            Chef::Log.debug "App: #{app}, Redirect permitted: no"
-            redirect_permitted = false
-          else
-            Chef::Log.debug "App: #{app}, Redirect permitted: yes"
-            redirect_permitted = true
-          end
+        # The logic here is inverted so that we can keep 'false' as the default
+        # behavior instead of requiring that all applications specify this
+        # option.  It also helps make the template more readable.
+        if app_conf['ssl_disable_redirect']
+          Chef::Log.debug "App: #{app}, Redirect permitted: no"
+          redirect_permitted = false
+        else
+          Chef::Log.debug "App: #{app}, Redirect permitted: yes"
+          redirect_permitted = true
+        end
 
-          app_endpoint_host = acls[app_endpoint_host_acl(app_conf, acls)]['match']
+        app_endpoint_host = acls[app_endpoint_host_acl(app_conf, acls)]['match']
 
+        ssl_redirects << {
+          'acls' => app_conf['acls'],
+          'fqdn' => app_endpoint_host,
+          'redirect_permitted' => redirect_permitted
+        }
+
+        if app_conf['endpoint']
           ssl_redirects << {
-            'acls' => app_conf['acls'],
-            'fqdn' => app_endpoint_host,
+            'acls' => [["host_endpoint_#{app}"]],
+            'fqdn' => app_conf['endpoint'],
             'redirect_permitted' => redirect_permitted
           }
-
-          if app_conf['endpoint']
-            ssl_redirects << {
-              'acls' => [["host_endpoint_#{app}"]],
-              'fqdn' => app_conf['endpoint'],
-              'redirect_permitted' => redirect_permitted
-            }
-          end # if app_conf['endpoint']
-        end # if ssl_required
+        end # if app_conf['endpoint']
       end # node['haproxy']['applications'].each
 
       ssl_redirect_lines(ssl_redirects.uniq)
