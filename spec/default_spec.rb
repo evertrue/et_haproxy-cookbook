@@ -20,7 +20,6 @@ describe 'et_haproxy::default' do
         'applications' => {},
         'backends' => {}
       }
-      node.set['platform_family'] = 'debian'
     end.converge(described_recipe)
   end
 

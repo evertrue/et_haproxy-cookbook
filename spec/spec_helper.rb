@@ -7,6 +7,8 @@ require 'rspec/mocks'
 require_relative '../libraries/et_haproxy.rb'
 
 RSpec.configure do |config|
+  config.platform = 'ubuntu'
+  config.version = '12.04'
 end
 
 if defined?(ChefSpec)
