@@ -104,10 +104,43 @@ describe 'et_haproxy::default' do
     expect(chef_run).to start_service('haproxy')
   end
 
+  it 'should not execute haproxy_config_verify' do
+    exec_haproxy_config_verify = chef_run.execute('haproxy_config_verify')
+    expect(exec_haproxy_config_verify).to do_nothing
+    expect(chef_run).to_not run_execute('haproxy_config_verify').with(
+      command: '/usr/sbin/haproxy -c -f /etc/haproxy/haproxy.cfg')
+  end
+
+  it 'should create the haproxy config' do
+    expect(chef_run).to create_template('/etc/haproxy/haproxy.cfg').with(
+      source: 'haproxy.cfg.erb',
+      user:  'root',
+      group: 'root',
+      mode:  00644
+    )
+  end
+
   it 'should notify haproxy_config_verify to run and haproxy to reload' do
     resource = chef_run.template('/etc/haproxy/haproxy.cfg')
     expect(resource).to notify('execute[haproxy_config_verify]').to(:run)
     expect(resource).to notify('service[haproxy]').to(:reload)
+  end
+
+  it 'should create directory /etc/haproxy/custom-errorfiles' do
+    expect(chef_run).to create_directory('/etc/haproxy/custom-errorfiles').with(
+      user:  'root',
+      group: 'root',
+      mode:  0755
+    )
+  end
+
+  it 'should create cookbook file /etc/haproxy/custom-errorfiles/403.http' do
+    expect(chef_run).to create_cookbook_file('/etc/haproxy/custom-errorfiles/403.http').with(
+      source: 'custom-errorfiles/403.http',
+      owner:  'root',
+      group:  'root',
+      mode:   0644
+    )
   end
 
   it 'should install haproxyctl' do
