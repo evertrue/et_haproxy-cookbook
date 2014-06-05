@@ -11,15 +11,7 @@ RSpec.configure do |config|
   config.version = '12.04'
 end
 
-if defined?(ChefSpec)
-  def install_sudo(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:sudo, :install, resource_name)
-  end
-
-  def remove_sudo(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:sudo, :remove, resource_name)
-  end
-end
+require_relative 'support/matchers'
 
 def stub_haproxy_items
   Fog.mock!
