@@ -18,7 +18,8 @@ script:
 after_script:
 - bundle exec kitchen destroy
 notifications:
-  slack: evertrue:aceK52JFVEqyEyA82bWk2GKY
+  slack:
+    secure: N2Jmz2nONP/+cJDTdyjKtXhNqUK95AYAMpBg/J5LzjRzor05Wp0jv/Gl24JmQ1l+LjOgTfb+rgkdsITXURtswbFChlWHz2SPfD8Q3bDt97KOk3yZ55TKm8HKNzXcnCI1wyLYaUqZiubpnIFfCax36/IK07j7CmBN6AEs+wSIPro=
 env:
   global:
   - secure: OXDAoHF2NZbWbiSeNingUPXW88DsUVbZ7wYyuTDr2u8w24pREpdHpS6YYIwY41EinaxQtq7AeobIH+9XNBPX9LViSeMgQYqjAMog+NpQT9aimoc73S8iZkoW9lN6fNVwJkTEYVnOLY7isEtcEOneFzUueZ/3pIX9hRVrrorsQHI=
