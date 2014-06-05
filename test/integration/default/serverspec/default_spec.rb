@@ -62,10 +62,6 @@ server stage-api-1 stage-api-1.priv.evertrue.com:8080 check))
   end
 end
 
-# describe 'HAProxy Configuration' do
-#   file('/etc/haproxy/haproxy.cfg')
-# end
-
 describe 'haproxyctl' do
   describe package 'ruby1.9.1' do
     it { should be_installed }
