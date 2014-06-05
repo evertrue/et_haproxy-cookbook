@@ -73,31 +73,35 @@ describe 'et_haproxy::default' do
   end
 
   %w(
+    apt
+    et_haproxy::syslog
+    et_fog
+    et_haproxy::stunnel
+  ).each do |recipe|
+    it "should include the #{recipe} recipe" do
+      expect(chef_run).to include_recipe recipe
+    end
+  end
+
+  %w(
     haproxy
     socat
     ruby1.9.1
+    curl
   ).each do |pkg|
     it 'should install package #{pkg}' do
       expect(chef_run).to install_package(pkg).at_converge_time
     end
   end
 
-  it 'should install haproxyctl' do
-    expect(chef_run).to install_gem_package('haproxyctl')
-  end
-
-  it 'should add control_haproxy sudoer rules' do
-    expect(chef_run).to install_sudo('control_haproxy')
+  it 'should render file /etc/default/haproxy' do
+    expect(chef_run).to render_file('/etc/default/haproxy').with_content(
+      "# This file is managed by chef\n\nENABLED=1")
   end
 
   it 'should start/enable service haproxy' do
     expect(chef_run).to enable_service('haproxy')
     expect(chef_run).to start_service('haproxy')
-  end
-
-  it 'should render file /etc/default/haproxy' do
-    expect(chef_run).to render_file('/etc/default/haproxy').with_content(
-      "# This file is managed by chef\n\nENABLED=1")
   end
 
   it 'should notify haproxy_config_verify to run and haproxy to reload' do
@@ -106,12 +110,12 @@ describe 'et_haproxy::default' do
     expect(resource).to notify('service[haproxy]').to(:reload)
   end
 
-  it 'should include the et_haproxy::syslog recipe' do
-    chef_run.should include_recipe 'et_haproxy::syslog'
+  it 'should install haproxyctl' do
+    expect(chef_run).to install_gem_package('haproxyctl')
   end
 
-  it 'should include the et_fog recipe' do
-    chef_run.should include_recipe 'et_fog'
+  it 'should add control_haproxy sudoer rules' do
+    expect(chef_run).to install_sudo('control_haproxy')
   end
 end
 
