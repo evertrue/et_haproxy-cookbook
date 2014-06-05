@@ -77,3 +77,63 @@ describe 'haproxyctl' do
     its(:content) { should include '/usr/local/bin/haproxyctl disable server *' }
   end
 end
+
+describe 'Syslog Service' do
+  describe file('/etc/rsyslog.d/99-haproxy.conf') do
+    it { should be_file }
+    it { should be_owned_by 'root' }
+    it { should be_grouped_into 'root' }
+    it { should be_mode '644' }
+    its(:content) { should match(/if \( \\\s+\(\$syslogfacility-text == 'local0'\) and \\/) }
+    its(:content) { should match(/\s+\(\$programname == 'haproxy'\) \\\s+\) \\/) }
+    its(:content) { should match(%r{then /var/log/haproxy.log\s+# Log no further\.\.\.\s+& ~}) }
+  end
+
+  describe service('rsyslog') do
+    it { should be_enabled }
+    it { should be_running }
+  end
+end
+
+describe 'HAProxy log rotation' do
+  describe file '/etc/logrotate.d/haproxy' do
+    it { should be_file }
+    its(:content) { should include '/var/log/haproxy.log' }
+    its(:content) { should include '100M' }
+    its(:content) { should include 'daily' }
+    its(:content) { should include 'rotate 10' }
+    its(:content) { should include 'sharedscripts' }
+    its(:content) { should include 'compress' }
+    its(:content) { should include 'notifempty' }
+    its(:content) { should include 'missingok' }
+    its(:content) { should include 'reload rsyslog > /dev/null 2>&1 || true' }
+  end
+end
+
+describe 'SSL certificate' do
+  describe file('/etc/ssl/certs/STAR.evertrue.com.pem') do
+    it { should be_file }
+    its(:content) { should include "-----END CERTIFICATE-----\n\n-----BEGIN CERTIFICATE-----" }
+  end
+
+  describe file('/etc/ssl/private/evertrue.key') do
+    it { should be_file }
+    its(:content) { should include '-----BEGIN RSA PRIVATE KEY-----' }
+  end
+end
+
+describe 'stunnel service' do
+  describe port(443) do
+    it { should be_listening }
+  end
+
+  describe file('/etc/stunnel/stunnel.conf') do
+    it { should be_file }
+    its(:content) { should include "[haproxy_ssl]\naccept = 443\nconnect = 8443" }
+  end
+
+  describe service('stunnel') do
+    it { should be_running }
+    it { should be_enabled }
+  end
+end
