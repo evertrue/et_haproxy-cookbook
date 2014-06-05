@@ -7,10 +7,6 @@ require 'rspec/mocks'
 require_relative '../libraries/et_haproxy.rb'
 
 RSpec.configure do |config|
-  config.before(:each) do
-    Fog.mock!
-    Fog::Mock.reset
-  end
 end
 
 if defined?(ChefSpec)
