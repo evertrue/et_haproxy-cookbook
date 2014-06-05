@@ -23,6 +23,7 @@ describe 'et_haproxy::default' do
       node.set['platform_family'] = 'debian'
     end.converge(described_recipe)
   end
+
   before do
     Fog.mock!
     Fog::Mock.reset
@@ -57,31 +58,14 @@ describe 'et_haproxy::default' do
         'app_key' => 'APP_KEY'
       }
     )
+
     Chef::EncryptedDataBagItem.stub(:load).with('secrets', 'aws_credentials').and_return(
       'Ec2Haproxy' => {
         'access_key_id' => 'SAMPLE_ACCESS_KEY_ID',
         'secret_access_key' => 'SECRET_ACCESS_KEY'
       }
     )
-    # Chef::Resource::Template.any_instance.stub(:trusted_networks).with(
-    #  @trusted_networks_obj).and_return({
-    #     'global' => [
-    #       '1.2.3.0/24',
-    #       '192.168.0.0/24'
-    #     ]
-    #   })
-    # Chef::Resource::Template.any_instance.stub(:eips).with('Ec2Haproxy').and_return(
-    #   [
-    #     '1.2.3.4',
-    #     '5.6.7.8'
-    #   ]
-    # )
-    # Chef::Resource::Template.any_instance.stub(:instance_ext_ips).with('Ec2Haproxy').and_return(
-    #   [
-    #     '2.3.4.5',
-    #     '3.4.5.6'
-    #   ]
-    # )
+
     stub_data_bag('access_control').and_return([
       { id: 'trusted_networks' }
     ])
@@ -105,13 +89,6 @@ describe 'et_haproxy::default' do
   it 'should add control_haproxy sudoer rules' do
     expect(chef_run).to install_sudo('control_haproxy')
   end
-
-  # describe 'trusted_ips' do
-  #   it 'should return IPs' do
-  #     Chef::Resource::Template.any_instance.should_receive(:trusted_ips).with(
-  #       @trusted_networks_obj).and_return(['127.0.0.1/24','192.168.19.0/24'])
-  #   end
-  # end
 
   it 'should start/enable service haproxy' do
     expect(chef_run).to enable_service('haproxy')
