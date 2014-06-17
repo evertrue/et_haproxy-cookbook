@@ -5,7 +5,7 @@
 # and mainly:
 # http://www.rsyslog.com/doc/rsyslog_conf_filter.html
 
-$SystemLogRateLimitBurst 800
+$SystemLogRateLimitBurst <%= node['haproxy']['syslog_rate_limit_burst'] %>
 
 if ( \
   ($syslogfacility-text == '<%= node['haproxy']['syslog']['facility'] %>') and \
