@@ -11,4 +11,6 @@ group :integration do
            # path: '../nginx'
   cookbook 'et_hostname'
            # path: '../et_hostname'
+  cookbook 'et_logger'
+           # path: '../et_logger'
 end

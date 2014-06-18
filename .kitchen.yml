@@ -22,6 +22,7 @@ suites:
 - name: default
   run_list:
     - recipe[apt::default]
+    - recipe[et_logger]
     - recipe[et_nginx::default]
     - recipe[et_hostname]
     - recipe[et_users]

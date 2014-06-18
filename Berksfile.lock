@@ -3,6 +3,8 @@ DEPENDENCIES
     path: .
     metadata: true
   et_hostname
+  et_logger
+    path: ../et_logger
   et_nginx
 
 GRAPH
@@ -29,6 +31,8 @@ GRAPH
     stunnel (= 2.0.4)
     sudo (~> 2.5.2)
   et_hostname (1.0.3)
+  et_logger (2.1.0)
+    rsyslog (= 1.12.3)
   et_nginx (2.0.1)
     apt (~> 2.2)
     bluepill (~> 2.3)
@@ -76,8 +80,9 @@ GRAPH
   sudo (2.5.2)
   windows (1.31.0)
     chef_handler (>= 0.0.0)
-  xml (1.2.4)
+  xml (1.2.6)
     build-essential (>= 0.0.0)
+    chef-sugar (>= 0.0.0)
   yum (3.2.2)
   yum-epel (0.3.6)
     yum (~> 3.0)
