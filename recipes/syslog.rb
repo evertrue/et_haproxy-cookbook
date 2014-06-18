@@ -8,12 +8,16 @@ file '/etc/rsyslog.d/30-haproxy.conf' do
   action :delete
 end
 
-template '/etc/rsyslog.d/99-haproxy.conf' do
+template "#{node['rsyslog']['config_prefix']}/rsyslog.d/45-haproxy.conf" do
   source 'rsyslog.erb'
   owner 'root'
   group 'root'
   mode 00644
   notifies :restart, 'service[rsyslog]'
+end
+
+file "#{node['rsyslog']['config_prefix']}/rsyslog.d/99-haproxy.conf" do
+  action :delete
 end
 
 logrotate_app 'haproxy' do

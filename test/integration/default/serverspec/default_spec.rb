@@ -79,7 +79,7 @@ describe 'haproxyctl' do
 end
 
 describe 'Syslog Service' do
-  describe file('/etc/rsyslog.d/99-haproxy.conf') do
+  describe file('/etc/rsyslog.d/45-haproxy.conf') do
     it { should be_file }
     it { should be_owned_by 'root' }
     it { should be_grouped_into 'root' }
