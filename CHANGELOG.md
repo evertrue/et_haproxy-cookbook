@@ -2,6 +2,13 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.1.3 (2014-06-19)
+-------------------
+
+* Fix issue with tracked Berksfile.lock
+    - See 6a3ad74 for details
+
+
 v3.1.2 (2014-06-17)
 -------------------
 
