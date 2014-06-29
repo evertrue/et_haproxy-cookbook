@@ -2,15 +2,23 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.1.4 (2014-06-29)
+-------------------
+
+* Change rotation retention to 50
+
+
 v3.1.2 (2014-06-17)
 -------------------
 
 * Make syslog rate limit burst a configurable attribute
 
+
 v3.1.1 (2014-06-16)
 -------------------
 
 * Add SystemLogRateLimitBurst 800 to rsyslog template
+
 
 v3.1.0 (2014-06-04)
 -------------------
