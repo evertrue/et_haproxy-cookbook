@@ -25,7 +25,7 @@ logrotate_app 'haproxy' do
   path '/var/log/haproxy.log'
   size '100M'
   frequency 'daily'
-  rotate 10
+  rotate 50
   sharedscripts true
   options %w(compress notifempty missingok)
   create '644 root adm'
