@@ -22,7 +22,7 @@ end
 
 logrotate_app 'haproxy' do
   cookbook 'logrotate'
-  path '/var/log/haproxy.log'
+  path node['haproxy']['syslog']['file']
   size '100M'
   frequency 'daily'
   rotate 50

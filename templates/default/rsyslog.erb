@@ -11,7 +11,7 @@ if ( \
   ($syslogfacility-text == '<%= node['haproxy']['syslog']['facility'] %>') and \
   ($programname == 'haproxy') \
 ) \
-then /var/log/haproxy.log
+then <%= node['haproxy']['syslog']['file'] %>
 
 # Log no further...
 & ~
