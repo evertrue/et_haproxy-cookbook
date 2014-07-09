@@ -10,6 +10,7 @@ describe 'et_haproxy::syslog' do
         'applications' => {},
         'backends' => {}
       }
+      node.set['rsyslog']['config_prefix'] = '/etc'
     end.converge(described_recipe)
   end
 
@@ -27,7 +28,7 @@ describe 'et_haproxy::syslog' do
   end
 
   it 'should create the haproxy rsyslog config' do
-    expect(chef_run).to create_template('/etc/rsyslog.d/99-haproxy.conf').with(
+    expect(chef_run).to create_template('/etc/rsyslog.d/45-haproxy.conf').with(
       source: 'rsyslog.erb',
       user:  'root',
       group: 'root',
@@ -36,8 +37,12 @@ describe 'et_haproxy::syslog' do
   end
 
   it 'should notify rsyslog to restart' do
-    resource = chef_run.template('/etc/rsyslog.d/99-haproxy.conf')
+    resource = chef_run.template('/etc/rsyslog.d/45-haproxy.conf')
     expect(resource).to notify('service[rsyslog]').to(:restart)
+  end
+
+  it 'should delete file /etc/rsyslog.d/99-haproxy.conf' do
+    expect(chef_run).to delete_file('/etc/rsyslog.d/99-haproxy.conf')
   end
 
   it 'should create appropriate log rotate config for haproxy log' do
@@ -48,7 +53,7 @@ describe 'et_haproxy::syslog' do
         create:        '644 root adm',
         frequency:     'daily',
         size:          '100M',
-        rotate:        10,
+        rotate:        50,
         sharedscripts: true,
         postrotate:    'reload rsyslog > /dev/null 2>&1 || true',
         prerotate:     '',
