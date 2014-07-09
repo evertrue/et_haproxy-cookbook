@@ -15,4 +15,5 @@ group :test do
   gem 'kitchen-ec2',     '>= 0.8'
 
   gem 'fog', '~> 1.20'
+  gem 'rspec', '~> 2.14.0'
 end
