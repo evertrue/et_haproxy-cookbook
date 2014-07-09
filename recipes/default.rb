@@ -99,3 +99,4 @@ sudo 'control_haproxy' do
 end
 
 include_recipe 'et_haproxy::stunnel'
+include_recipe 'et_security'

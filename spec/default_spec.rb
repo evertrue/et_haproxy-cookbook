@@ -32,6 +32,7 @@ describe 'et_haproxy::default' do
     et_haproxy::syslog
     et_fog
     et_haproxy::stunnel
+    et_security
   ).each do |recipe|
     it "should include the #{recipe} recipe" do
       expect(chef_run).to include_recipe recipe
