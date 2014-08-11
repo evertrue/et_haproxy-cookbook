@@ -1,5 +1,12 @@
 {
   "id": "trusted_networks",
+  "local": [
+    {
+      "name": "localhost",
+      "contact": "devops@evertrue.com",
+      "network": "127.0.0.1/32"
+    }
+  ],
   "global": [
     {
         "name": "330 Congress Office",
