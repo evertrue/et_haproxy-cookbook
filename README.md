@@ -1,6 +1,7 @@
 # et_haproxy cookbook
 
 [![Build Status](https://travis-ci.org/evertrue/et_haproxy-cookbook.svg?branch=master)](https://travis-ci.org/evertrue/et_haproxy-cookbook)
+[![Coverage Status](https://img.shields.io/coveralls/evertrue/et_haproxy-cookbook.svg)](https://coveralls.io/r/evertrue/et_haproxy-cookbook)
 
 This cookbook installs and configures the haproxy load balancer according to rules defined in node defintions.
 
