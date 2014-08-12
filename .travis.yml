@@ -2,7 +2,6 @@ language: ruby
 bundler_args: "--without kitchen_vagrant"
 rvm:
 - 1.9.3
-- 2.1
 before_install:
 - echo -n $EC2_KEY_CHUNK_{0..30} >> ~/.ssh/travis_ci_ec2.base64
 - cat ~/.ssh/travis_ci_ec2.base64 | tr -d ' ' | base64 --decode > ~/.ssh/travis_ci_ec2.pem
