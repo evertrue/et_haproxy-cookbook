@@ -62,11 +62,18 @@ GEM
       fauxhai (~> 2.0)
       rspec (~> 2.14)
     coderay (1.1.0)
+    coveralls (0.7.0)
+      multi_json (~> 1.3)
+      rest-client
+      simplecov (>= 0.7)
+      term-ansicolor
+      thor
     dep-selector-libgecode (1.0.1)
     dep_selector (1.0.3)
       dep-selector-libgecode (~> 1.0)
       ffi (~> 1.9)
     diff-lcs (1.2.5)
+    docile (1.1.5)
     erubis (2.7.0)
     excon (0.37.0)
     faraday (0.9.0)
@@ -201,11 +208,18 @@ GEM
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
     semverse (1.1.0)
+    simplecov (0.9.0)
+      docile (~> 1.1.0)
+      multi_json
+      simplecov-html (~> 0.8.0)
+    simplecov-html (0.8.0)
     slop (3.5.0)
     solve (1.2.0)
       dep_selector (~> 1.0)
       semverse (~> 1.1)
     systemu (2.5.2)
+    term-ansicolor (1.3.0)
+      tins (~> 1.0)
     test-kitchen (1.2.1)
       mixlib-shellout (~> 1.2)
       net-scp (~> 1.1)
@@ -215,6 +229,7 @@ GEM
     thor (0.19.1)
     timers (2.0.0)
       hitimes
+    tins (1.3.0)
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
@@ -229,6 +244,7 @@ PLATFORMS
 DEPENDENCIES
   berkshelf (~> 3.0)
   chefspec (~> 3.0)
+  coveralls
   fog (~> 1.20)
   foodcritic (~> 3.0)
   kitchen-ec2 (>= 0.8)

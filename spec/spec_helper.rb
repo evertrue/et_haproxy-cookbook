@@ -3,6 +3,9 @@ require 'chefspec'
 require 'chefspec/berkshelf'
 require 'fog'
 require 'rspec/mocks'
+require 'coveralls'
+
+Coveralls.wear!
 
 require_relative '../libraries/et_haproxy.rb'
 
