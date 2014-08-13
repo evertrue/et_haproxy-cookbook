@@ -1,5 +1,5 @@
 # Encoding: utf-8
-default['haproxy']['access_control']['sets'] = ['global', 'local']
+default['haproxy']['access_control']['sets'] = %w(global local)
 default['haproxy']['aws_api_user'] = 'Ec2Haproxy'
 default['haproxy']['syslog']['dest'] = '/dev/log'
 default['haproxy']['syslog']['facility'] = 'local0'
