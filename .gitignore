@@ -17,3 +17,5 @@ bin/*
 
 .kitchen/
 .kitchen.local.yml
+
+coverage/
