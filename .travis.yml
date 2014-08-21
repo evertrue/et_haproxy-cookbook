@@ -18,6 +18,7 @@ before_install:
 - echo 'chef_server_url "https://api.opscode.com/organizations/evertrue"' >> ~/.chef/knife.rb
 - chmod 600 ~/.chef/knife.rb ~/.chef/trubot.pem
 - chmod 600 ~/.ssh/travis_ci_ec2.pem ~/encrypted_data_bag_secret ~/.ssh/id_rsa
+- ssh-add -D
 script:
 - bundle exec berks install && bundle exec rake travis
 notifications:
