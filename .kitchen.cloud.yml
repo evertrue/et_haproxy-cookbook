@@ -8,6 +8,7 @@ driver:
   ssh_key: <%= ENV['EC2_SSH_KEY_PATH'] %>
   region: us-east-1
   availability_zone: us-east-1b
+  price: 0.105
   security_group_ids: ['ci-testing']
   username: ubuntu
   flavor_id: c3.large
