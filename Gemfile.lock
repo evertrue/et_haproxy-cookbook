@@ -1,3 +1,12 @@
+GIT
+  remote: git://github.com/test-kitchen/kitchen-ec2.git
+  revision: e7f840f927518b0f9e29914205c048a463de654e
+  tag: e7f840f927518b0f9e29914205c048a463de654e
+  specs:
+    kitchen-ec2 (0.8.1.dev)
+      fog
+      test-kitchen (~> 1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -115,9 +124,6 @@ GEM
     hitimes (1.2.1)
     ipaddress (0.8.0)
     json (1.8.1)
-    kitchen-ec2 (0.8.0)
-      fog
-      test-kitchen (~> 1.0)
     kitchen-vagrant (0.15.0)
       test-kitchen (~> 1.0)
     method_source (0.8.2)
@@ -247,7 +253,7 @@ DEPENDENCIES
   coveralls
   fog (~> 1.20)
   foodcritic (~> 3.0)
-  kitchen-ec2 (>= 0.8)
+  kitchen-ec2!
   kitchen-vagrant (~> 0.14)
   rake
   rspec (~> 2.14.0)
