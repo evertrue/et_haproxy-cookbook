@@ -1,4 +1,4 @@
-source 'https://api.berkshelf.com'
+source 'https://supermarket.getchef.com'
 source 'https://berks.evertrue.com'
 
 metadata
