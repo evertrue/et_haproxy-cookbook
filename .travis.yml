@@ -1,7 +1,4 @@
 language: ruby
-cache:
-  directories:
-  - vendor/bundle
 rvm:
 - 1.9.3
 before_install:
