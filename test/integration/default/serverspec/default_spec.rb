@@ -47,7 +47,7 @@ describe 'HAProxy Service' do
         'stage-api stage-api.evertrue.com'
     end
     it do
-      should contain(%Q(backend legacyapi-stage
+      should contain(%(backend legacyapi-stage
 server stage-api-1 stage-api-1.priv.evertrue.com:8080 check))
     end
   end
