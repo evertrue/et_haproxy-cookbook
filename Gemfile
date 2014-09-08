@@ -9,7 +9,7 @@ group :test do
   gem 'berkshelf',  '~> 3.0'
   gem 'chefspec',   '~> 3.0'
   gem 'foodcritic', '~> 3.0'
-  gem 'rubocop',    '~> 0.23'
+  gem 'rubocop',    '~> 0.26'
 
   gem 'fog', '~> 1.20'
   gem 'rspec', '~> 2.14.0'
