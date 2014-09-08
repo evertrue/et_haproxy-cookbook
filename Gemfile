@@ -18,8 +18,8 @@ end
 group :test, :integration do
   gem 'test-kitchen',    '~> 1.1'
   gem 'kitchen-ec2',
-    github: 'test-kitchen/kitchen-ec2',
-    tag: 'e7f840f927518b0f9e29914205c048a463de654e'
+      github: 'test-kitchen/kitchen-ec2',
+      tag: 'e7f840f927518b0f9e29914205c048a463de654e'
 end
 
 group :test, :vagrant do
