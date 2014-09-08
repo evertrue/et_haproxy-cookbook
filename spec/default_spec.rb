@@ -192,7 +192,7 @@ describe EtHaproxy::Helpers do
 
   describe 'eips' do
     it 'should return mock elastic IPs from AWS/Fog' do
-      mock_eips = @fog_conn.addresses.map { |a| a.public_ip }
+      mock_eips = @fog_conn.addresses.map(&:public_ip)
 
       helpers.eips('Ec2Haproxy').should == mock_eips
     end

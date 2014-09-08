@@ -44,13 +44,13 @@ module EtHaproxy
               "#{n_obj.class}/#{n_obj.inspect}"
           end
 
-          ips[set] += IPAddress(n).map { |net| net.address }
+          ips[set] += IPAddress(n).map(&:address)
         end
       end
 
       # Add Pingdom IPs to global whitelist
       pingdom_ips.each do |ip|
-        ips['global'] += IPAddress(ip).map { |net| net.address }
+        ips['global'] += IPAddress(ip).map(&:address)
       end
 
       ips
@@ -87,7 +87,7 @@ module EtHaproxy
         aws_secret_access_key: aws_keys['secret_access_key']
       )
 
-      conn.addresses.map { |a| a.public_ip }
+      conn.addresses.map(&:public_ip)
     end
 
     def instance_ext_ips(aws_api_user)
@@ -101,8 +101,8 @@ module EtHaproxy
         aws_secret_access_key: aws_keys['secret_access_key']
       )
 
-      public_ip_servers = conn.servers.select { |s| s.public_ip_address }
-      public_ip_servers.map { |s| s.public_ip_address }
+      public_ip_servers = conn.servers.select(&:public_ip_address)
+      public_ip_servers.map(&:public_ip_address)
     end
 
     def backend_options(conf)
