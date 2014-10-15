@@ -11,12 +11,12 @@
     {
         "name": "330 Congress Office",
         "contact": "devops@evertrue.com",
-        "network": "1.2.3.4/24"
+        "network": "1.2.3.4/29"
     },
     {
         "name": "VPN IP Pool",
         "contact": "devops",
-        "network": "192.168.19.0/24"
+        "network": "192.168.19.0/29"
     }
   ]
 }

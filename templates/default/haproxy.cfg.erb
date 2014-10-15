@@ -1,11 +1,5 @@
 # This file is maintained by chef
 
-<%
-  class ::Chef::Mixin::Template::TemplateContext
-    include ::EtHaproxy::Helpers
-  end
--%>
-
 global
   log <%= node['haproxy']['syslog']['dest'] %> <%= node['haproxy']['syslog']['facility'] %>
   maxconn <%= node['haproxy']['global']['maxconn'] %>
@@ -32,41 +26,37 @@ defaults
   option forwardfor
   <% end -%>
 
-
 listen stats :<%= node['haproxy']['stats']['port'] %>
   stats enable
   stats uri <%= node['haproxy']['stats']['uri'] %>
   stats auth <%= node['haproxy']['stats']['admin_user'] %>:<%= node['haproxy']['stats']['admin_password'] %>
   monitor-uri <%= node['haproxy']['monitor_uri'] %>
-
 <%
-  node['haproxy']['frontends'].each do |fe_name,fe_conf|
+  haproxy_conf = EtHaproxy::Conf.new(node['haproxy'], node.chef_environment)
+  haproxy_conf.frontends.each do |fe|
 -%>
 
-frontend <%= fe_name %>
+frontend <%= fe.name %>
   <%
-    fe_conf['ports'].each do |bind_port| -%>
+    fe.ports.each do |bind_port|
+  -%>
   bind :<%= bind_port %>
   <%
-    end
+    end # fe.ports.each do |bind_port|
 
-    if fe_conf['vpn'] == true
+    if fe.vpn?
   -%>
-  # VPN ENDPOINT
+  #
+  # vpn endpoint
+  #
   <%
-
-      node['haproxy']['acls'].select do |acl,acl_conf|
-        acl_conf['type'] == 'hdr_beg(host)'
-      end.each do |acl,acl_conf|
-      -%>
-      acl <%= acl %> <%= acl_conf['type'] %> <%= acl_conf['match'].split('.').first %>
-      redirect prefix http://<%= acl_conf['match'].split('.').first %>:<%= fe_conf['redirect_port'] %> if <%= acl %>
-      <%
-      end
-
-    else
-
-      unless fe_conf['disable_x_forwarded_for']
+      haproxy_conf.vpn_rules(fe.redirect_port).each do |rule|
+  -%>
+  <%= rule %>
+  <%
+      end # haproxy_conf.vpn_rules(fe.redirect_port).each do |rule|
+    else # if fe.vpn?
+      unless fe.conf['disable_x_forwarded_for']
   -%>
   option forwardfor if-none
   capture request header X-Forwarded-For len 51
@@ -75,94 +65,52 @@ frontend <%= fe_name %>
   -%>
 
   #
-  # Endpoint acl definitions
-  #
-
   # Access Control acls
+  #
   <%
-        max_line_length = 60
-        node['haproxy']['access_control']['sets'].each do |ac_set|
-          @trusted_ips[ac_set].each_slice(max_line_length).each do |ip_slice|
+      max_line_length = 60
+      node['haproxy']['access_control']['sets'].each do |ac_set|
+        @trusted_ips[ac_set].each_slice(max_line_length).each do |ip_slice|
   -%>
   acl src_access_control_set_<%= ac_set %> hdr_ip(X-Forwarded-For) <%= ip_slice.join(" ") %>
   <%
-          end
-        end # node['haproxy']['access_control']['sets'].each do |ac_set|
+        end # @trusted_ips[ac_set].each_slice(max_line_length).each do |ip_slice|
+      end # node['haproxy']['access_control']['sets'].each do |ac_set|
 
-        node['haproxy']['access_control']['sets'].each do |ac_set|
-          @trusted_networks[ac_set].each_slice(max_line_length).each do |ip_slice|
+      node['haproxy']['access_control']['sets'].each do |ac_set|
+        @trusted_networks[ac_set].each_slice(max_line_length).each do |ip_slice|
   -%>
   acl src_access_control_set_<%= ac_set %> src <%= ip_slice.join(' ') %>
   <%
-          end
-        end # node['haproxy']['access_control']['sets'].each do |ac_set|
+        end # @trusted_networks[ac_set].each_slice(max_line_length).each do |ip_slice|
+      end # node['haproxy']['access_control']['sets'].each do |ac_set|
   -%>
   acl src_access_control_eips hdr_ip(X-Forwarded-For) <%= @eips.sort.join(' ') %>
   acl src_access_control_instance_ext_ips hdr_ip(X-Forwarded-For) <%= @instance_ext_ips.join(' ') %>
 
-  # Statically defined acls
+  #
+  # Routing acls
+  #
   <%
 
-        if node['haproxy']['acls']
-          node['haproxy']['acls'].each do |acl_name,acl_conf|
+      haproxy_conf.acls.each do |acl|
   -%>
-  acl <%= acl_name %> <%= acl_conf['type'] %><% unless acl_conf['case_sensitive'] %> -i<% end %> <%= acl_conf['match'].split('.').first + ' ' if acl_conf['type'] =~ /hdr_.*(host)/ %><%= acl_conf['match'] %>
+  <%= acl.conf_line %>
   <%
-          end # node['haproxy']["acls"].each
-        end # if node['haproxy']["acls"]
+      end # fe.acls.each do |acl|
+      haproxy_conf.endpoint_only_acls.each do |line|
   -%>
+  <%= line %>
+  <%
+      end # haproxy_conf.endpoint_only_acls.each do |line|
 
-  # host-only endpoint acl definitions
-  <%
-        node['haproxy']['applications'].select {|app,app_conf|
-          app_conf['endpoint']
-        }.each do |app,app_conf|
-  -%>
-  acl host_endpoint_<%= app %> hdr_beg(host) -i <%= app_conf['endpoint'].split('.').first %> <%= app_conf['endpoint'] %>
-  <%
-        end
-  -%>
-
-  # Block rules
-  <%
-        node['haproxy']['applications'].select { |app,app_conf|
-          app_conf['access_control']
-        }.each do |app,app_conf|
-          if app_conf['allowed']
-            app_conf['acls'].each do |app_acls|
-              app_acls_w_blocks = app_acls + app_conf['allowed']['host_groups'].map {|hg| "!src_access_control_#{hg}" }
-              app_acls_w_blocks += app_conf['allowed']['acls'].map { |a|
-                "!#{a}"
-              } if app_conf['allowed']['acls']
-  -%>
-  block if <%= app_acls_w_blocks.join(' ') %>
-  <%
-            end
-          else
-            Chef::Log.warn("Application #{app} has access_control: true but" \
-              ' does not have an allow list')
-          end
-        end
-
-        unless fe_conf['ssl']
+      unless fe.ssl?
   -%>
 
   errorfile 403 /etc/haproxy/custom-errorfiles/403.http
 
-  #
-  # Forced SSL redirects (if any) or blocks (if SSL redirect is disabled)
-  #
   <%
-          gen_ssl_redirects(
-              node['haproxy']['applications'],
-              node['haproxy']['acls']
-            ).each do |ssl_redirect_line|
-  -%>
-  <%= ssl_redirect_line %>
-  <%
-          end # ssl_redirects_line.each
-
-        else # unless fe_conf['ssl']
+      else # unless fe.ssl?
   -%>
   # This makes sure everything passed through this frontend leaves
   # with exactly one X-Forwarded-Proto header indicating, in this
@@ -171,46 +119,33 @@ frontend <%= fe_name %>
   reqadd   X-Forwarded-Proto:\ https
 
   <%
-        end # fe_conf["ssl"]
+      end # unless fe.ssl?
   -%>
   #
   # routing rules (if any)
   #
   <%
-        node['haproxy']['applications'].each do |app,app_conf|
-          if ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
-            ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
-            if app_conf['backend']
+      fe.routing_rule_lines.each do |rule|
   -%>
-  use_backend <%= app_conf['backend'] %> if <%= string_acls(app_conf['acls']) %><% if app_conf['endpoint'] %> or host_endpoint_<%= app %><% end %>
+  <%= rule %>
   <%
-            elsif app_conf['redirect']
-  -%>
-  redirect <%= app_conf['redirect']['type'] %> <%= app_conf['redirect']['destination'] %> code <%= app_conf['redirect']['code'] %> if <%= string_acls(app_conf['acls']) %>
-  <%
-            end
-          end # ( fe_conf['ssl'] && app_conf['ssl_enabled'] ) ||
-         # ( ! fe_conf['ssl'] && ! app_conf['ssl_required'] )
-
-        end # node['haproxy']['applications'].each
-
-      end # if fe_conf['vpn']
-
-    end # node['haproxy']['frontends'].each
+      end # fe.applications.each do |app|
+    end # if fe.vpn?
+  end # haproxy_conf.frontends.each do |fe|
   -%>
 
   #
   # backend rules
   #
 <%
-    node['haproxy']['backends'].each do |be_name,be_conf|
-      backend_clause(be_name,be_conf).each do |line|
--%>
-<%= line %>
-<%
-    end
+  haproxy_conf.backends.each do |backend|
 -%>
 
 <%
-  end # node['haproxy']['backends'].each
+    backend.clause.each do |line|
+-%>
+<%= line %>
+<%
+    end # backend.clause.each do |line|
+  end # haproxy_conf.backends.each do |backend|
 -%>

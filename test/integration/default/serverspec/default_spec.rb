@@ -27,28 +27,170 @@ describe 'HAProxy Service' do
       it { should be_listening.with('tcp') }
     end
   end
+end
 
+describe 'Configuration' do
   describe file('/etc/haproxy/haproxy.cfg') do
     it { should be_file }
     it { should contain 'frontend main' }
     it { should contain 'frontend main_ssl' }
-    it { should contain 'block if host_stage-api uri_search or host_test_host' }
-    it do
-      should contain 'block if host_stage-api uri_search ' \
-        '!src_access_control_set_global !src_access_control_eips ' \
-        '!src_access_control_instance_ext_ips'
+
+    context 'acls' do
+      it 'has acl host-api' do
+        contents = '  acl host-api hdr(host) -i api api.local'
+        should contain(contents)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain(contents)
+          .after(/^frontend main_ssl$/)
+      end
+      it 'has acl uri_search' do
+        contents = '  acl uri_search path_beg -i /search'
+        should contain(contents)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain(contents)
+          .after(/^frontend main_ssl$/)
+      end
+      it 'has acl host-block' do
+        contents = '  acl host-block hdr(host) -i block block.local'
+        should contain(contents)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain(contents)
+          .after(/^frontend main_ssl$/)
+      end
+      it 'has acl exempt_from_access_control' do
+        contents = '  acl exempt_from_access_control hdr(host) -i ' \
+          'access-control-exempt access-control-exempt.local'
+        should contain(contents)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain(contents)
+          .after(/^frontend main_ssl$/)
+      end
+      it 'has acl one_more_rule' do
+        contents = '  acl one_more_rule path_beg -i /one_more_rule'
+        should contain(contents)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain(contents)
+          .after(/^frontend main_ssl$/)
+      end
     end
-    it do
-      should contain 'acl src_access_control_set_global ' \
-        'hdr_ip(X-Forwarded-For) 192.168.19.56 192.168.19.57'
+
+    context 'app host-endpoint-only' do
+      app_name = 'host-endpoint-only'
+      it 'has acl' do
+        should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
+          'hostendpointonly hostendpointonly.local')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'has block rules in non-SSL section' do
+        should contain("  block if host_endpoint_#{app_name} " \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'has block rules in SSL section' do
+        should contain("  block if host_endpoint_#{app_name} " \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+      end
+      it 'has use_backend rule in non-SSL section' do
+        should contain("  use_backend #{app_name} if host_endpoint_#{app_name}")
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'does not have use_backend rule in SSL section' do
+        should_not contain("  use_backend #{app_name} if " \
+          "host_endpoint_#{app_name}")
+          .after(/^frontend main_ssl$/)
+      end
     end
-    it do
-      should contain 'acl host_stage-api hdr_beg(host) -i ' \
-        'stage-api stage-api.evertrue.com'
+
+    context 'app host-with-endpoint' do
+      app_name = 'host-with-endpoint'
+      it 'has block rules' do
+        should contain('  block if host-api uri_search ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+        should contain('  block if host-api one_more_rule ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'has block rules in SSL section' do
+        should contain('  block if host-api uri_search ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+        should contain('  block if host-api one_more_rule ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips !exempt_from_access_control')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+      end
+      it 'has use_backend rule in non-SSL section' do
+        should contain("  use_backend #{app_name} if host-api " \
+          'uri_search or host-api one_more_rule or ' \
+          'host_endpoint_host-with-endpoint')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'does not have use_backend rule in SSL section' do
+        should_not contain("  use_backend #{app_name} if host-api " \
+          'uri_search or host-api one_more_rule or ' \
+          'host_endpoint_host-with-endpoint')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+      end
     end
-    it do
-      should contain(%(backend legacyapi-stage
-server stage-api-1 stage-api-1.priv.evertrue.com:8080 check))
+
+    context 'app host-without-endpoint' do
+      app_name = 'host-without-endpoint'
+      it 'has block rules in non-SSL section' do
+        should contain('  block if host-api uri_search one_more_rule ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'has block rules in SSL section' do
+        should contain('  block if host-api uri_search one_more_rule ' \
+          '!src_access_control_set_global !src_access_control_eips ' \
+          '!src_access_control_instance_ext_ips')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+      end
+      it 'has use_backend rule in non-SSL section' do
+        should contain("  use_backend #{app_name} if host-api uri_search " \
+          'one_more_rule')
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
+      end
+      it 'does not have use_backend rule in SSL section' do
+        should_not contain("  use_backend #{app_name} if host-api uri_search " \
+          'one_more_rule')
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
+      end
+    end
+
+    context 'backends' do
+      it 'has backend host-endpoint-only' do
+        should contain("backend host-endpoint-only\n  option httpchk OPTIONS " \
+          "/search/\n  server dev-api-generic-1d 10.0.103.254:8080 check")
+          .after(/^  # backend rules/)
+      end
     end
   end
 
@@ -98,15 +240,17 @@ end
 describe 'HAProxy log rotation' do
   describe file '/etc/logrotate.d/haproxy' do
     it { should be_file }
-    its(:content) { should include '/var/log/haproxy.log' }
-    its(:content) { should include '100M' }
-    its(:content) { should include 'daily' }
-    its(:content) { should include 'rotate 10' }
-    its(:content) { should include 'sharedscripts' }
-    its(:content) { should include 'compress' }
-    its(:content) { should include 'notifempty' }
-    its(:content) { should include 'missingok' }
-    its(:content) { should include 'reload rsyslog > /dev/null 2>&1 || true' }
+    [
+      '/var/log/haproxy.log',
+      '100M',
+      'daily',
+      'rotate 50',
+      'sharedscripts',
+      'compress',
+      'notifempty',
+      'missingok',
+      'reload rsyslog > /dev/null 2>&1 || true'
+    ].each { |contents| its(:content) { should include contents } }
   end
 end
 

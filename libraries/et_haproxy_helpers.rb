@@ -189,11 +189,10 @@ module EtHaproxy
           redirect_permitted = true
         end
 
-        app_endpoint_host = acls[app_endpoint_host_acl(app_conf, acls)]['match']
-
         ssl_redirects << {
           'acls' => app_conf['acls'],
-          'fqdn' => app_endpoint_host,
+          'fqdn' => app_conf['endpoint'] ||
+            acls[app_endpoint_host_acl(app_conf, acls)]['match'],
           'redirect_permitted' => redirect_permitted
         }
 
