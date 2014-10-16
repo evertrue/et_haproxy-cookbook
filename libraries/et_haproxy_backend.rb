@@ -53,6 +53,13 @@ module EtHaproxy
     #   @conf['check_req']
     # end
 
+    def server_count
+      count = 0
+      count += @conf['servers'].count if @conf['servers']
+      count += recipe_servers.count if servers_recipe?
+      count
+    end
+
     private
 
     def options
@@ -67,10 +74,7 @@ module EtHaproxy
     end
 
     def check_hosts?
-      check_req? &&
-        check_req['always'] ||
-        (@conf['servers_recipe'] &&
-          !@recipe_clusters[servers_recipe].empty?)
+      check_req? && check_req['always'] || server_count > 1
     end
 
     def servers
