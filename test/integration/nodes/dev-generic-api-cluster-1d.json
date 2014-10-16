@@ -1,0 +1,17 @@
+{
+  "name": "dev-generic-api-cluster-1d",
+  "chef_environment": "dev",
+  "run_list": [
+    "recipe[et_generic_api_cluster]"
+  ],
+  "automatic": {
+    "fqdn": "dev-generic-api-cluster-1d.priv.evertrue.com",
+    "ipaddress": "10.0.103.253",
+    "recipes": [
+      "et_generic_api_cluster::default"
+    ],
+    "roles": [
+
+    ]
+  }
+}
