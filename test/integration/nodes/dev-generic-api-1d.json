@@ -1,11 +1,11 @@
 {
-  "name": "dev-api-generic-1d",
+  "name": "dev-generic-api-1d",
   "chef_environment": "dev",
   "run_list": [
     "recipe[et_generic_api]"
   ],
   "automatic": {
-    "fqdn": "dev-api-generic-1d.priv.evertrue.com",
+    "fqdn": "dev-generic-api-1d.priv.evertrue.com",
     "ipaddress": "10.0.103.254",
     "recipes": [
       "et_generic_api::default"
