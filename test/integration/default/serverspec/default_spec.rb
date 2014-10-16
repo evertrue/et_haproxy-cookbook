@@ -79,117 +79,285 @@ describe 'Configuration' do
       end
     end
 
-    context 'app host-endpoint-only' do
-      app_name = 'host-endpoint-only'
-      it 'has acl' do
-        should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
-          'hostendpointonly hostendpointonly.local')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
+    context 'apps' do
+      context 'host-endpoint-only' do
+        app_name = 'host-endpoint-only'
+        it 'has acl' do
+          should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
+            'hostendpointonly hostendpointonly.local')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in non-SSL section' do
+          should contain("  block if host_endpoint_#{app_name} " \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain("  block if host_endpoint_#{app_name} " \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has use_backend rule in non-SSL section' do
+          should contain("  use_backend #{app_name} if host_endpoint_#{app_name}")
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'does not have use_backend rule in SSL section' do
+          should_not contain("  use_backend #{app_name} if " \
+            "host_endpoint_#{app_name}")
+            .after(/^frontend main_ssl$/)
+        end
       end
-      it 'has block rules in non-SSL section' do
-        should contain("  block if host_endpoint_#{app_name} " \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
-      end
-      it 'has block rules in SSL section' do
-        should contain("  block if host_endpoint_#{app_name} " \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
-      end
-      it 'has use_backend rule in non-SSL section' do
-        should contain("  use_backend #{app_name} if host_endpoint_#{app_name}")
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
-      end
-      it 'does not have use_backend rule in SSL section' do
-        should_not contain("  use_backend #{app_name} if " \
-          "host_endpoint_#{app_name}")
-          .after(/^frontend main_ssl$/)
-      end
-    end
 
-    context 'app host-with-endpoint' do
-      app_name = 'host-with-endpoint'
-      it 'has block rules' do
-        should contain('  block if host-api uri_search ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
-        should contain('  block if host-api one_more_rule ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
+      context 'host-with-endpoint' do
+        app_name = 'host-with-endpoint'
+        it 'has acl' do
+          should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
+            'host-with-endpoint host-with-endpoint.local')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+          should contain('  block if host-api one_more_rule ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+          should contain('  block if host-api one_more_rule ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips !exempt_from_access_control')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has use_backend rule in non-SSL section' do
+          should contain("  use_backend #{app_name} if host-api " \
+            'uri_search or host-api one_more_rule or ' \
+            'host_endpoint_host-with-endpoint')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'does not have use_backend rule in SSL section' do
+          should_not contain("  use_backend #{app_name} if host-api " \
+            'uri_search or host-api one_more_rule or ' \
+            'host_endpoint_host-with-endpoint')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
       end
-      it 'has block rules in SSL section' do
-        should contain('  block if host-api uri_search ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
-        should contain('  block if host-api one_more_rule ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips !exempt_from_access_control')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
-      end
-      it 'has use_backend rule in non-SSL section' do
-        should contain("  use_backend #{app_name} if host-api " \
-          'uri_search or host-api one_more_rule or ' \
-          'host_endpoint_host-with-endpoint')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
-      end
-      it 'does not have use_backend rule in SSL section' do
-        should_not contain("  use_backend #{app_name} if host-api " \
-          'uri_search or host-api one_more_rule or ' \
-          'host_endpoint_host-with-endpoint')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
-      end
-    end
 
-    context 'app host-without-endpoint' do
-      app_name = 'host-without-endpoint'
-      it 'has block rules in non-SSL section' do
-        should contain('  block if host-api uri_search one_more_rule ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
+      context 'host-without-endpoint' do
+        app_name = 'host-without-endpoint'
+        it 'has block rules in non-SSL section' do
+          should contain('  block if host-api uri_search one_more_rule ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if host-api uri_search one_more_rule ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has use_backend rule in non-SSL section' do
+          should contain("  use_backend #{app_name} if host-api uri_search " \
+            'one_more_rule')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'does not have use_backend rule in SSL section' do
+          should_not contain("  use_backend #{app_name} if host-api uri_search " \
+            'one_more_rule')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
       end
-      it 'has block rules in SSL section' do
-        should contain('  block if host-api uri_search one_more_rule ' \
-          '!src_access_control_set_global !src_access_control_eips ' \
-          '!src_access_control_instance_ext_ips')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
+
+      context 'ssl-host-with-endpoint' do
+        app_name = 'ssl-host-with-endpoint'
+        it 'has acl' do
+          should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
+            'ssl-host-with-endpoint ssl-host-with-endpoint.local')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has block rules in non-SSL section' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'does not have redirect rule in any section' do
+          should_not contain("  redirect #{app_name} if host-api uri_search or " \
+            'host_endpoint_ssl-host-with-endpoint')
+        end
+        it 'does not have use_backend rule in non-SSL section' do
+          should_not contain("  use_backend #{app_name} if host-api uri_search")
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has use_backend rule in SSL section' do
+          should contain("  use_backend #{app_name} if host-api uri_search or " \
+            'host_endpoint_ssl-host-with-endpoint')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
       end
-      it 'has use_backend rule in non-SSL section' do
-        should contain("  use_backend #{app_name} if host-api uri_search " \
-          'one_more_rule')
-          .after(/^frontend main$/)
-          .before(/^frontend main_ssl$/)
+
+      context 'ssl-redirect-host-with-endpoint' do
+        app_name = 'ssl-redirect-host-with-endpoint'
+        it 'has acl' do
+          should contain("  acl host_endpoint_#{app_name} hdr_beg(host) -i " \
+            "#{app_name} #{app_name}.local")
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has block rules in non-SSL section' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if host-api uri_search ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'has redirect rule in non-SSL section' do
+          should contain("  redirect prefix https://#{app_name}.local code 301 " \
+            "if host-api uri_search or host_endpoint_#{app_name}")
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'does not have use_backend rule in non-SSL section' do
+          should_not contain("  use_backend #{app_name} if host-api uri_search " \
+            "or host_endpoint_#{app_name}")
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has use_backend rule in SSL section' do
+          should contain("  use_backend #{app_name} if host-api uri_search or " \
+            "host_endpoint_#{app_name}")
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
       end
-      it 'does not have use_backend rule in SSL section' do
-        should_not contain("  use_backend #{app_name} if host-api uri_search " \
-          'one_more_rule')
-          .after(/^frontend main_ssl$/)
-          .before(/^  # backend rules/)
+
+      context 'ssl-host-without-endpoint' do
+        app_name = 'ssl-host-without-endpoint'
+        it 'has block rules in non-SSL section' do
+          should contain('  block if host-api uri_search ' \
+            'uri_host_without_endpoint !src_access_control_set_global ' \
+            '!src_access_control_eips !src_access_control_instance_ext_ips')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if host-api uri_search ' \
+            'uri_host_without_endpoint !src_access_control_set_global ' \
+            '!src_access_control_eips !src_access_control_instance_ext_ips')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+        it 'does not have redirect rule in non-SSL section' do
+          should_not contain("  redirect prefix https://#{app_name}.local code " \
+            '301 if host-api uri_search uri_host_without_endpoint')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'does not have use_backend rule in non-SSL section' do
+          should_not contain("  use_backend #{app_name} if host-api uri_search " \
+            'uri_host_without_endpoint')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has use_backend rule in SSL section' do
+          should contain("  use_backend #{app_name} if host-api uri_search " \
+            'uri_host_without_endpoint')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
+      end
+
+      context 'just-block' do
+        it 'has block rules in non-SSL section' do
+          should contain('  block if uri_search host-block ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main$/)
+            .before(/^frontend main_ssl$/)
+        end
+        it 'has block rules in SSL section' do
+          should contain('  block if uri_search host-block ' \
+            '!src_access_control_set_global !src_access_control_eips ' \
+            '!src_access_control_instance_ext_ips')
+            .after(/^frontend main_ssl$/)
+            .before(/^  # backend rules/)
+        end
       end
     end
 
     context 'backends' do
-      it 'has backend host-endpoint-only' do
-        should contain("backend host-endpoint-only\n  option httpchk OPTIONS " \
-          "/search/\n  server dev-api-generic-1d 10.0.103.254:8080 check")
-          .after(/^  # backend rules/)
+      its(:content) do
+        should include("\nbackend host-endpoint-only\n" \
+                       "  option httpchk OPTIONS /search/\n" \
+                       "  server dev-generic-api-1d 10.0.103.254:8080 check\n")
+      end
+      its(:content) do
+        should include("\nbackend host-with-endpoint\n" \
+                       "  server stage-api-1 stage-api-1.local:8080 check\n" \
+                       "  server stage-api-2 stage-api-2.local:8080 check\n")
+      end
+      its(:content) do
+        should include("\nbackend host-without-endpoint\n" \
+                       "  server dev-generic-api-1d 10.0.103.254:8080\n")
+      end
+      its(:content) do
+        should include("\nbackend ssl-host-with-endpoint\n" \
+                       "  server stage-api-1 stage-api-1.local:8080 check\n" \
+                       "  server stage-api-2 stage-api-2.local:8080 check\n")
+      end
+      its(:content) do
+        should include("\nbackend ssl-redirect-host-with-endpoint\n" \
+                       "  option httpchk OPTIONS /search/\n" \
+                       '  server dev-generic-api-cluster-1b 10.0.103.252:8080' \
+                       " check\n" \
+                       '  server dev-generic-api-cluster-1d 10.0.103.253:8080' \
+                       " check\n")
+      end
+      its(:content) do
+        should include("\nbackend ssl-host-without-endpoint\n" \
+                       "  server stage-api-1 stage-api-1.local:8080 check\n")
       end
     end
   end
