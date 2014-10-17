@@ -18,12 +18,12 @@ module EtHaproxy
       o = "acl #{name} #{type}"
       o += ' -i' unless case_sensitive?
       o += " #{shorthostname}" if host?
-      o += " #{match}"
+      o += " #{match}" unless host? && shorthostname == match
       o
     end
 
     def host?
-      type == 'hdr(host)'
+      type == 'hdr(host)' || type == 'hdr_beg(host)'
     end
 
     def fqdn
