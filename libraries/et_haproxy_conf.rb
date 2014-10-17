@@ -43,7 +43,7 @@ module EtHaproxy
         line = 'redirect prefix ' \
           "http://#{acl.shorthostname}:#{redirect_port} if "
         line += '!' if acl.negative?
-        line += "#{acl.name}"
+        line += acl.name
         output << line
       end
     end
@@ -104,9 +104,9 @@ module EtHaproxy
       clusters = Hash[server_recipes.map { |r| [r, []] }]
 
       # Make a hash of servers and their associated recipes.
-      nodes.each do |node|
-        (server_recipes & node.recipes).each do |recipe|
-          clusters[recipe] << node
+      nodes.each do |n|
+        (server_recipes & n.recipes).each do |recipe|
+          clusters[recipe] << n
         end
       end
 
