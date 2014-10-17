@@ -11,10 +11,7 @@ module EtHaproxy
     end
 
     def backend_rule
-      {
-        type: 'use_backend',
-        args: "#{backend} if #{acl_string}"
-      }
+      { type: 'use_backend', args: "#{backend} if #{acl_string}" }
     end
 
     def ssl_redirect_rule
@@ -33,12 +30,7 @@ module EtHaproxy
     end
 
     def block_rules
-      block_acl_sets.map do |set|
-        {
-          type: 'block',
-          args: "if #{set.join(' ')}"
-        }
-      end
+      block_acl_sets.map { |set| { type: 'block', args: "if #{set.join(' ')}" } }
     end
 
     def block_acl_sets
@@ -54,10 +46,6 @@ module EtHaproxy
         allowed['host_groups']
       o += allowed['acls'].map { |a| "!#{a}" } if allowed['acls']
       o # Satisfies RuboCop
-    end
-
-    def ssl_required?
-      @conf.keys.include?('ssl_required') && @conf['ssl_required']
     end
 
     def legacy_endpoint?
