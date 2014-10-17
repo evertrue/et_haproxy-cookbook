@@ -79,14 +79,13 @@ module EtHaproxy
 
     def server_recipes
       @server_recipes ||= begin
-        @conf['backends'].map do |_b, b_conf|
-          next unless b_conf['servers_recipe']
-          if b_conf['servers_recipe'] !~ /::/
-            "#{b_conf['servers_recipe']}::default"
-          else
-            b_conf['servers_recipe']
-          end
+        all_recipes = @conf['backends'].map do |_b, b_conf|
+          b_conf['servers_recipe']
         end.compact.uniq
+        all_recipes + all_recipes.map do |recipe|
+          next unless recipe !~ /::/
+          "#{recipe}::default"
+        end.compact
       end
     end
 
@@ -106,7 +105,7 @@ module EtHaproxy
 
       # Make a hash of servers and their associated recipes.
       nodes.each do |n|
-        (server_recipes & n.recipes).each do |recipe|
+        normalize_recipes(server_recipes & n.recipes).each do |recipe|
           clusters[recipe] << n
         end
       end
@@ -115,6 +114,10 @@ module EtHaproxy
       Chef::Log.debug(clusters.inspect)
 
       clusters
+    end
+
+    def normalize_recipes(recipes)
+      recipes.map { |r| r !~ /\:\:/ ? "#{r}::default" : r }.uniq
     end
   end
 end
