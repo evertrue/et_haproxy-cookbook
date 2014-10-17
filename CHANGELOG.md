@@ -2,6 +2,15 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.3.1 (2014-10-17)
+-------------------
+
+* normalize recipe names so that ::default is appended to all recipes with no ::
+* Fix logic for finding endpoint fqdn
+* Fix double/redundant hostnames in acl lines
+* Remove unnecessary apt recipe from kitchen run list
+* Temporarily remove unit tests from travis/default test suites (because they are substantially broken now)
+
 v3.3.0 (2014-10-17)
 -------------------
 
