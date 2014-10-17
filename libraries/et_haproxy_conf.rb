@@ -27,8 +27,9 @@ module EtHaproxy
 
     def endpoint_only_acls
       applications.map do |app|
+        next unless app.simple_endpoint?
         "acl #{app.host_endpoint_acl_name} #{app.legacy_endpoint_match}"
-      end
+      end.compact
     end
 
     def host_acls

@@ -1,4 +1,5 @@
 module EtHaproxy
+  # rubocop:disable Style/ClassLength
   class Application
     attr_reader :name
     attr_accessor :options
@@ -53,10 +54,14 @@ module EtHaproxy
     end
 
     def legacy_endpoint_match
-      "hdr_beg(host) -i #{short_endpoint} #{endpoint}"
+      o = 'hdr_beg(host) -i'
+      o += " #{legacy_endpoint.split('.').first}" if legacy_endpoint =~ /\./
+      o += " #{legacy_endpoint}"
+      o # Satisfies RuboCop
     end
 
     def short_endpoint
+      fail "Could not get endpoint for #{name}" if endpoint.nil?
       endpoint.split('.').first
     end
 
@@ -69,15 +74,30 @@ module EtHaproxy
       @conf['redirect_permitted']
     end
 
-    def endpoint
+    def legacy_endpoint
       return @conf['endpoint'] if @conf['endpoint']
+    end
 
-      acls.map do |acl_outer|
-        acl_outer.find do |acl|
+    def endpoint
+      return legacy_endpoint if legacy_endpoint
+      endpoint_acl.fqdn
+    end
+
+    def endpoint_acl
+      # rubocop:disable Style/EachWithObject
+      endpoint_acls = acls.reduce([]) do |collector, acl_set|
+        acl_set.each do |acl|
           g_a = global_acl(acl)
-          return g_a.fqdn if !g_a.negative? && g_a.host?
+          collector << g_a if !g_a.negative? && g_a.host?
         end
+        collector
       end
+      # rubocop:enable Style/EachWithObject
+      fail "Could not find a valid endpoint for app \"#{name}\"" if
+        endpoint_acls.empty?
+      Chef::Log.debug("Found these valid endpoint acls for #{name}: " \
+        "#{endpoint_acls.inspect}")
+      endpoint_acls.first
     end
 
     def global_acl(acl_name)
@@ -116,4 +136,5 @@ module EtHaproxy
       super(sym, include_private)
     end
   end
+  # rubocop:enable Style/ClassLength
 end
