@@ -2,6 +2,15 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.3.0 (2014-10-17)
+-------------------
+
+* Move to a view-model approach to managing the master config
+* Fix Travis-CI convergence issues
+* Genericize test data
+* Add Coveralls
+* Update many underlying Gems and cookbooks
+
 v3.2.1 (2014-08-11)
 -------------------
 
