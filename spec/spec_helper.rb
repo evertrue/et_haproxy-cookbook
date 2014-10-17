@@ -7,7 +7,7 @@ require 'coveralls'
 
 Coveralls.wear!
 
-require_relative '../libraries/et_haproxy.rb'
+require_relative '../libraries/et_haproxy_helpers.rb'
 
 RSpec.configure do |config|
   config.platform = 'ubuntu'
