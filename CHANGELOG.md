@@ -2,6 +2,11 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.3.2 (2014-10-17)
+-------------------
+
+* Switch to entirely pessimistic versioning of cookbooks
+
 v3.3.1 (2014-10-17)
 -------------------
 
