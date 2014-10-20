@@ -45,8 +45,16 @@ module EtHaproxy
       # rubocop:disable Style/EachWithObject
       output = @applications.reduce([]) do |rules, app|
         rules << routing_rule(app)
-        rules += app.block_rules if
-          app.access_control? && !app.block_acl_sets.empty?
+        case
+        when prevent_ssl_redirect?(app)
+          Chef::Log.debug("#{app.name} prevent_ssl_redirect: true")
+          rules += app.block_rules
+        when app.access_control? &&
+          !app.block_acl_sets(type: 'ip').empty? &&
+          !prevent_ssl_redirect?(app)
+          Chef::Log.debug("#{app.name} IP-based block rules: true")
+          rules += app.block_rules(type: 'ip')
+        end
         rules
       end.compact
       # rubocop:enable Style/EachWithObject
@@ -95,6 +103,13 @@ module EtHaproxy
 
     def routable?(app)
       app.backend? || app.redirect?
+    end
+
+    def prevent_ssl_redirect?(app)
+      !ssl &&
+        app.ssl_enabled? &&
+        app.ssl_required? &&
+        !app.redirect_permitted?
     end
 
     def needs_ssl_redirect?(app)

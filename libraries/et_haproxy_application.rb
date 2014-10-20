@@ -30,16 +30,34 @@ module EtHaproxy
       }
     end
 
-    def block_rules
-      block_acl_sets.map { |set| { type: 'block', args: "if #{set.join(' ')}" } }
+    def block_rules(options = {})
+      block_acl_sets(options).map do |set|
+        { type: 'block', args: "if #{set.join(' ')}" }
+      end
     end
 
-    def block_acl_sets
+    # rubocop:disable Style/CyclomaticComplexity
+    def block_acl_sets(options = {})
       o = []
-      o << ([host_endpoint_acl_name] + allowed_set) if endpoint?
-      acls.map { |acl_set| o << (acl_set + allowed_set) } if acls?
+      if endpoint?
+        o << (
+          [host_endpoint_acl_name] + (
+            options[:type] && options[:type] == 'ip' ? allowed_set : []
+          )
+        )
+      end
+      if acls?
+        acls.map do |acl_set|
+          o << (
+            acl_set + (
+              options[:type] && options[:type] == 'ip' ? allowed_set : []
+            )
+          )
+        end
+      end
       o
     end
+    # rubocop:enable Style/CyclomaticComplexity
 
     def allowed_set
       o = []
@@ -70,8 +88,8 @@ module EtHaproxy
     end
 
     def redirect_permitted?
-      return true unless @conf.key('redirect_permitted')
-      @conf['redirect_permitted']
+      return true unless @conf.key?('ssl_disable_redirect')
+      !@conf['ssl_disable_redirect']
     end
 
     def legacy_endpoint

@@ -200,10 +200,8 @@ describe 'Configuration' do
             .after(/^frontend main_ssl$/)
             .before(/^  # backend rules/)
         end
-        it 'has block rules in non-SSL section' do
-          should contain('  block if host-api uri_search ' \
-            '!src_access_control_set_global !src_access_control_eips ' \
-            '!src_access_control_instance_ext_ips')
+        it 'has global block rules in non-SSL section' do
+          should contain("  block if host-api uri_search\n")
             .after(/^frontend main$/)
             .before(/^frontend main_ssl$/)
         end
@@ -241,13 +239,20 @@ describe 'Configuration' do
         end
         it 'has block rules in non-SSL section' do
           should contain('  block if host-api uri_search ' \
+            'uri_ssl-redirect-host-with-endpoint ' \
             '!src_access_control_set_global !src_access_control_eips ' \
             '!src_access_control_instance_ext_ips')
             .after(/^frontend main$/)
             .before(/^frontend main_ssl$/)
         end
+        its(:content) do
+          should_not match(/^  block if host-api uri_search \
+                            uri_ssl-redirect-host-with-endpoint or
+                            host_endpoint_#{app_name}$/x)
+        end
         it 'has block rules in SSL section' do
           should contain('  block if host-api uri_search ' \
+            'uri_ssl-redirect-host-with-endpoint ' \
             '!src_access_control_set_global !src_access_control_eips ' \
             '!src_access_control_instance_ext_ips')
             .after(/^frontend main_ssl$/)
@@ -255,19 +260,20 @@ describe 'Configuration' do
         end
         it 'has redirect rule in non-SSL section' do
           should contain("  redirect prefix https://#{app_name}.local code 301 " \
-            "if host-api uri_search or host_endpoint_#{app_name}")
+            'if host-api uri_search uri_ssl-redirect-host-with-endpoint ' \
+            "or host_endpoint_#{app_name}")
             .after(/^frontend main$/)
             .before(/^frontend main_ssl$/)
         end
         it 'does not have use_backend rule in non-SSL section' do
           should_not contain("  use_backend #{app_name} if host-api uri_search " \
-            "or host_endpoint_#{app_name}")
+            "uri_ssl-redirect-host-with-endpoint or host_endpoint_#{app_name}")
             .after(/^frontend main$/)
             .before(/^frontend main_ssl$/)
         end
         it 'has use_backend rule in SSL section' do
-          should contain("  use_backend #{app_name} if host-api uri_search or " \
-            "host_endpoint_#{app_name}")
+          should contain("  use_backend #{app_name} if host-api uri_search " \
+            "uri_ssl-redirect-host-with-endpoint or host_endpoint_#{app_name}")
             .after(/^frontend main_ssl$/)
             .before(/^  # backend rules/)
         end
@@ -275,12 +281,8 @@ describe 'Configuration' do
 
       context 'ssl-host-without-endpoint' do
         app_name = 'ssl-host-without-endpoint'
-        it 'has block rules in non-SSL section' do
-          should contain('  block if host-api uri_search ' \
-            'uri_host_without_endpoint !src_access_control_set_global ' \
-            '!src_access_control_eips !src_access_control_instance_ext_ips')
-            .after(/^frontend main$/)
-            .before(/^frontend main_ssl$/)
+        its(:content) do
+          should match(/^  block if host-api uri_search$/)
         end
         it 'has block rules in SSL section' do
           should contain('  block if host-api uri_search ' \
@@ -441,7 +443,7 @@ describe 'stunnel service' do
 
   describe file('/etc/stunnel/stunnel.conf') do
     it { should be_file }
-    its(:content) { should include "[haproxy_ssl]\naccept = 443\nconnect = 8443" }
+    its(:content) { should include "[haproxy_ssl]\nconnect = 8443\naccept = 443" }
   end
 
   describe service('stunnel') do

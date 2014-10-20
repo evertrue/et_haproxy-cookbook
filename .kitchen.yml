@@ -55,6 +55,9 @@ suites:
         uri_host_without_endpoint:
           type: path
           match: /uri_host_without_endpoint
+        uri_ssl-redirect-host-with-endpoint:
+          type: path
+          match: /uri_ssl-redirect-host-with-endpoint
       frontends:
         vpn_fe:
           vpn: true
@@ -133,6 +136,7 @@ suites:
           acls:
           - - host-api
             - uri_search
+            - uri_ssl-redirect-host-with-endpoint
           access_control: true
           allowed:
             host_groups:
