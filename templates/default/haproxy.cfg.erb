@@ -110,8 +110,20 @@ frontend <%= fe.name %>
   errorfile 403 /etc/haproxy/custom-errorfiles/403.http
 
   <%
-      else # unless fe.ssl?
+      end # unless fe.ssl?
   -%>
+  #
+  # routing rules (if any)
+  #
+  <%
+      fe.routing_rule_lines('block').each do |rule|
+  -%>
+  <%= rule %>
+  <%
+      end # fe.routing_rule_lines('block').each do |rule|
+      if fe.ssl?
+  %>
+
   # This makes sure everything passed through this frontend leaves
   # with exactly one X-Forwarded-Proto header indicating, in this
   # case, "https".
@@ -119,17 +131,14 @@ frontend <%= fe.name %>
   reqadd   X-Forwarded-Proto:\ https
 
   <%
-      end # unless fe.ssl?
-  -%>
-  #
-  # routing rules (if any)
-  #
-  <%
-      fe.routing_rule_lines.each do |rule|
+      end # if fe.ssl?
+      %w(redirect use_backend).each do |rule_type|
+        fe.routing_rule_lines(rule_type).each do |rule|
   -%>
   <%= rule %>
   <%
-      end # fe.applications.each do |app|
+        end # fe.routing_rule_lines(rule_type).each do |rule|
+      end # %w(redirect use_backend).each do |rule_type|
     end # if fe.vpn?
   end # haproxy_conf.frontends.each do |fe|
   -%>
