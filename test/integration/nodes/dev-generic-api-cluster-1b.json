@@ -4,8 +4,16 @@
   "run_list": [
     "recipe[et_generic_api_cluster]"
   ],
+  "default": {
+    "cluster": {
+      "name": "testapicluster",
+      "conf": {
+        "someconfigkey": "value"
+      }
+    }
+  },
   "automatic": {
-    "fqdn": "dev-generic-api-cluster-1b.priv.evertrue.com",
+    "fqdn": "dev-generic-api-cluster-1b.local",
     "ipaddress": "10.0.103.252",
     "recipes": [
       "et_generic_api_cluster::default"

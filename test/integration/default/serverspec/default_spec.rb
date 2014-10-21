@@ -361,6 +361,13 @@ describe 'Configuration' do
         should include("\nbackend ssl-host-without-endpoint\n" \
                        "  server stage-api-1 stage-api-1.local:8080 check\n")
       end
+      its(:content) do
+        should include("\nbackend auto_cluster_testapicluster\n" \
+                       '  server dev-generic-api-cluster-1b ' \
+                       "10.0.103.252:8080 check\n" \
+                       '  server dev-generic-api-cluster-1d ' \
+                       "10.0.103.253:8080 check\n")
+      end
     end
   end
 
