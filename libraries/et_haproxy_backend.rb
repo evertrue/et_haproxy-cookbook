@@ -45,15 +45,6 @@ module EtHaproxy
       "#{@conf['servers_recipe']}::default"
     end
 
-    # def check_req?
-    #   @conf.key?('check_req')
-    # end
-
-    # def check_req
-    #   Chef::Log.info @conf['check_req'].inspect
-    #   @conf['check_req']
-    # end
-
     def server_count
       count = 0
       count += @conf['servers'].count if @conf['servers']
