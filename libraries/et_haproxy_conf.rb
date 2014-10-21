@@ -93,7 +93,7 @@ module EtHaproxy
           c[n['cluster']['name']] = {
             'nodes' => []
           } unless c.key?(n['cluster']['name'])
-          c[n['cluster']['name']]['nodes'] << n.name
+          c[n['cluster']['name']]['nodes'] << n
           c[n['cluster']['name']]['conf'].merge!(
             n['cluster']['conf']
           ) if n['cluster']['conf']
