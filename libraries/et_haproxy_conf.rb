@@ -16,12 +16,17 @@ module EtHaproxy
     end
 
     def backends
-      @conf['backends'].map do |name, conf|
+      static = @conf['backends'].map do |name, conf|
         EtHaproxy::Backend.new(name,
                                conf,
-                               recipe_clusters,
-                               auto_clusters)
+                               recipe_clusters)
       end
+      automatic = auto_clusters.map do |name, conf|
+        Chef::Log.debug("Setting up backend for auto cluster #{name}")
+        Chef::Log.debug("Cluster data: #{conf.inspect}")
+        EtHaproxy::Backend.new("auto_cluster_#{name}", conf)
+      end
+      static + automatic
     end
 
     def acls
@@ -91,9 +96,10 @@ module EtHaproxy
 
         nodes.each_with_object({}) do |n, c|
           c[n['cluster']['name']] = {
-            'nodes' => []
+            'servers' => [],
+            'conf' => {}
           } unless c.key?(n['cluster']['name'])
-          c[n['cluster']['name']]['nodes'] << n
+          c[n['cluster']['name']]['servers'] << n
           c[n['cluster']['name']]['conf'].merge!(
             n['cluster']['conf']
           ) if n['cluster']['conf']
