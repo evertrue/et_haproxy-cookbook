@@ -36,10 +36,6 @@ module EtHaproxy
       super(sym, include_private)
     end
 
-    def tcp?
-      @conf.key?('tcp') && @conf['key']
-    end
-
     def servers_recipe
       return @conf['servers_recipe'] if @conf['servers_recipe'] =~ /::/
       "#{@conf['servers_recipe']}::default"
