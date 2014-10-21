@@ -2,6 +2,12 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.3.3 (2014-10-21)
+-------------------
+
+* Include explicit block rules when ssl_disable_redirect is true for an app
+* Bump newrelic-ng cookbook version to ~> 0.5
+
 v3.3.2 (2014-10-17)
 -------------------
 
