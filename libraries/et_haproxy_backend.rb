@@ -2,11 +2,10 @@ module EtHaproxy
   class Backend
     attr_reader :name
 
-    def initialize(name, conf, recipe_clusters, auto_clusters)
+    def initialize(name, conf, recipe_clusters = {})
       @name = name
       @conf = conf
       @recipe_clusters = recipe_clusters
-      @auto_clusters = auto_clusters
     end
 
     def clause
