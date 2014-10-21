@@ -16,6 +16,18 @@ module EtHaproxy
       output
     end
 
+    def servers_recipe
+      return @conf['servers_recipe'] if @conf['servers_recipe'] =~ /::/
+      "#{@conf['servers_recipe']}::default"
+    end
+
+    def server_count
+      count = 0
+      count += @conf['servers'].count if @conf['servers']
+      count += recipe_servers.count if servers_recipe?
+      count
+    end
+
     def method_missing(sym, *args, &block)
       real_name = sym.to_s.sub(/\?$/, '')
       if @conf.keys.include?(real_name)
@@ -34,18 +46,6 @@ module EtHaproxy
         sym.to_s.sub(/\?$/, '')
       )
       super(sym, include_private)
-    end
-
-    def servers_recipe
-      return @conf['servers_recipe'] if @conf['servers_recipe'] =~ /::/
-      "#{@conf['servers_recipe']}::default"
-    end
-
-    def server_count
-      count = 0
-      count += @conf['servers'].count if @conf['servers']
-      count += recipe_servers.count if servers_recipe?
-      count
     end
 
     private
