@@ -2,10 +2,11 @@ module EtHaproxy
   class Frontend
     attr_reader :name, :conf
 
-    def initialize(name, conf, applications)
+    def initialize(name, conf, applications, auto_clusters)
       @name = name
       @conf = conf
       @applications = applications
+      @auto_clusters = auto_clusters
     end
 
     def access_control_apps

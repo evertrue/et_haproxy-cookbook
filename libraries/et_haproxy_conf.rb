@@ -1,4 +1,5 @@
 module EtHaproxy
+  # rubocop:disable Style/ClassLength
   class Conf
     def initialize(conf, env)
       @conf = conf
@@ -7,17 +8,19 @@ module EtHaproxy
 
     def frontends
       @conf['frontends'].map do |name, conf|
-        EtHaproxy::Frontend.new(name, conf, applications)
+        EtHaproxy::Frontend.new(name,
+                                conf,
+                                applications,
+                                auto_clusters)
       end
     end
 
     def backends
       @conf['backends'].map do |name, conf|
-        EtHaproxy::Backend.new(
-          name,
-          conf,
-          recipe_clusters
-        )
+        EtHaproxy::Backend.new(name,
+                               conf,
+                               recipe_clusters,
+                               auto_clusters)
       end
     end
 
@@ -77,6 +80,27 @@ module EtHaproxy
       end
     end
 
+    def auto_clusters
+      @auto_clusters ||= begin
+        Chef::Log.info 'Gathering "auto clusters" data'
+
+        nodes = Chef::Search::Query.new.search(
+          :node,
+          "chef_environment:#{@env} AND cluster:*"
+        ).first.select { |n| n.key?('cluster') }
+
+        nodes.each_with_object({}) do |n, c|
+          c[n['cluster']['name']] = {
+            'nodes' => []
+          } unless c.key?(n['cluster']['name'])
+          c[n['cluster']['name']]['nodes'] << n.name
+          c[n['cluster']['name']]['conf'].merge!(
+            n['cluster']['conf']
+          ) if n['cluster']['conf']
+        end
+      end
+    end
+
     def server_recipes
       @server_recipes ||= begin
         all_recipes = @conf['backends'].map do |_b, b_conf|
@@ -93,6 +117,7 @@ module EtHaproxy
       recipe_search_string =
         server_recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
 
+      Chef::Log.info 'Building recipe clusters hash'
       nodes = Chef::Search::Query.new.search(
         :node,
         "chef_environment:#{@env} AND (#{recipe_search_string})"
@@ -120,4 +145,5 @@ module EtHaproxy
       recipes.map { |r| r !~ /\:\:/ ? "#{r}::default" : r }.uniq
     end
   end
+  # rubocop:enable Style/ClassLength
 end
