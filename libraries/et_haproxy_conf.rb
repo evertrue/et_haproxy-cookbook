@@ -82,6 +82,21 @@ module EtHaproxy
       end
     end
 
+    def hostname_acl(hostname)
+      acl = host_acls.find { |a| a.fqdn == hostname }
+      return acl unless acl.nil?
+      acl_name = "host_#{hostname.gsub('.', '-')}"
+      EtHaproxy::Acl.new(acl_name,
+                         'type' => 'hdr(host)',
+                         'match' => hostname)
+    end
+
+    def context_acl(context)
+      EtHaproxy::Acl.new("uri_#{context.gsub('/', '')}",
+                         'type' => 'path_beg',
+                         'match' => context)
+    end
+
     def auto_clusters
       @auto_clusters ||= begin
         Chef::Log.info 'Gathering "auto clusters" data'
@@ -92,14 +107,18 @@ module EtHaproxy
         ).first.select { |n| n.key?('cluster') }
 
         nodes.each_with_object({}) do |n, c|
-          c[n['cluster']['name']] = {
-            'servers' => [],
-            'conf' => {}
-          } unless c.key?(n['cluster']['name'])
+          c[n['cluster']['name']] = { 'servers' => [] } unless
+            c.key?(n['cluster']['name'])
           c[n['cluster']['name']]['servers'] << n
-          c[n['cluster']['name']]['conf'].merge!(
-            n['cluster']['conf']
-          ) if n['cluster']['conf']
+          c[n['cluster']['name']].merge!(n['cluster'])
+            .reject { |k, _v| k == 'name' }
+          c[n['cluster']['name']].merge!(
+            'backend' => "auto_cluster_#{n['cluster']['name']}",
+            'acls' => [[
+              hostname_acl(n['cluster']['hostname']),
+              context_acl(n['cluster']['context'])
+            ]]
+          )
         end
       end
     end
