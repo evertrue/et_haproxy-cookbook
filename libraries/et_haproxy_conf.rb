@@ -77,7 +77,16 @@ module EtHaproxy
 
     def applications
       @applications ||= begin
-        @conf['applications'].map do |name, conf|
+        Chef::Log.debug('Setting up these applications: ' \
+          "#{@conf['applications'].merge(auto_clusters).inspect}")
+        @conf['applications'].merge(
+          # The Application object expects string acls (not objects)
+          auto_clusters.each_with_object({}) do |(name, conf), memo|
+            memo[name] = conf.dup
+            memo[name]['acls'] =
+              memo[name]['acls'].map { |acl_and_set| acl_and_set.map(&:name) }
+          end
+        ).map do |name, conf|
           EtHaproxy::Application.new(
             name,
             conf,
