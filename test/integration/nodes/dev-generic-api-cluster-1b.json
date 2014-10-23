@@ -9,6 +9,13 @@
       "name": "testapicluster",
       "hostname": "dev-api.local",
       "context": "/testapi",
+      "ssl_enabled": true,
+      "ssl_required": true,
+      "check_req": {
+        "always": true,
+        "method": "OPTIONS",
+        "url": "/testapi"
+      },
       "conf": {
         "someconfigkey": "value"
       }
