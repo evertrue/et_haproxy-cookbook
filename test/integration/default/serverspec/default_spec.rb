@@ -79,6 +79,19 @@ describe 'Configuration' do
       end
     end
 
+    context 'auto-cluster' do
+      it 'has acl host_dev-api-local' do
+        should contain('  acl host_dev-api-local hdr(host) -i dev-api dev-api.local')
+      end
+      it 'has acl uri_testapi' do
+        should contain('  acl uri_testapi path_beg -i /testapi')
+      end
+      it 'has use_backend rule' do
+        should contain('  use_backend auto_cluster_testapicluster if ' \
+                       'host_dev-api-local uri_testapi')
+      end
+    end
+
     context 'apps' do
       context 'host-endpoint-only' do
         app_name = 'host-endpoint-only'
