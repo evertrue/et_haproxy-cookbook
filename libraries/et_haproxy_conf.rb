@@ -10,8 +10,7 @@ module EtHaproxy
       @conf['frontends'].map do |name, conf|
         EtHaproxy::Frontend.new(name,
                                 conf,
-                                applications,
-                                auto_clusters)
+                                applications)
       end
     end
 
