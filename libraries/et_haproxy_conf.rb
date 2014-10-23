@@ -81,7 +81,7 @@ module EtHaproxy
           EtHaproxy::Application.new(
             name,
             conf,
-            acls
+            (acls + auto_clusters.map { |_n, c| c['acls'] }.flatten)
           )
         end
       end
