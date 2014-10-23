@@ -117,20 +117,22 @@ module EtHaproxy
 
         nodes = Chef::Search::Query.new.search(
           :node,
-          "chef_environment:#{@env} AND cluster:*"
-        ).first.select { |n| n.key?('cluster') }
+          "chef_environment:#{@env} AND haproxy:*"
+        ).first.select { |n| n['haproxy'].key?('cluster') }
+
+        Chef::Log.debug("Auto clusters search found: #{nodes.inspect}")
 
         nodes.each_with_object({}) do |n, c|
-          c[n['cluster']['name']] = { 'servers' => [] } unless
-            c.key?(n['cluster']['name'])
-          c[n['cluster']['name']]['servers'] << n
-          c[n['cluster']['name']].merge!(n['cluster'])
+          c[n['haproxy']['cluster']['name']] = { 'servers' => [] } unless
+            c.key?(n['haproxy']['cluster']['name'])
+          c[n['haproxy']['cluster']['name']]['servers'] << n
+          c[n['haproxy']['cluster']['name']].merge!(n['haproxy']['cluster'])
             .reject { |k, _v| k == 'name' }
-          c[n['cluster']['name']].merge!(
-            'backend' => "auto_cluster_#{n['cluster']['name']}",
+          c[n['haproxy']['cluster']['name']].merge!(
+            'backend' => "auto_cluster_#{n['haproxy']['cluster']['name']}",
             'acls' => [[
-              hostname_acl(n['cluster']['hostname']),
-              context_acl(n['cluster']['context'])
+              hostname_acl(n['haproxy']['cluster']['hostname']),
+              context_acl(n['haproxy']['cluster']['context'])
             ]]
           )
         end

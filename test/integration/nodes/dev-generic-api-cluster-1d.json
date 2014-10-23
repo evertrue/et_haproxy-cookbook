@@ -5,19 +5,21 @@
     "recipe[et_generic_api_cluster]"
   ],
   "default": {
-    "cluster": {
-      "name": "testapicluster",
-      "hostname": "dev-api.local",
-      "context": "/testapi",
-      "ssl_enabled": true,
-      "ssl_required": true,
-      "check_req": {
-        "always": true,
-        "method": "OPTIONS",
-        "url": "/testapi"
-      },
-      "conf": {
-        "someconfigkey": "value"
+    "haproxy": {
+      "cluster": {
+        "name": "testapicluster",
+        "hostname": "dev-api.local",
+        "context": "/testapi",
+        "ssl_enabled": true,
+        "ssl_required": true,
+        "check_req": {
+          "always": true,
+          "method": "OPTIONS",
+          "url": "/testapi"
+        },
+        "conf": {
+          "someconfigkey": "value"
+        }
       }
     }
   },
