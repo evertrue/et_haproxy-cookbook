@@ -20,46 +20,42 @@ module EtHaproxy
       @conf.key?('vpn')
     end
 
-    def routing_rule_lines
+    def routing_rule_lines(rule_type)
       # This method really just exists to make sure that rules are rendered
       # in the correct order (otherwise haproxy throws a bunch of warnings).
       # It does not do any rule wrangling.
 
       rules = routing_rules
       Chef::Log.debug("Writing routing rules: #{rules.inspect}")
-      %w(
-        block
-        redirect
-        use_backend
-      ).reduce([]) do |collector, type|
-        Chef::Log.debug("Writing #{type} rules")
-        collector + rules.map do |r|
-          (r[:type] == type &&
-            "#{r[:type]} #{r[:args]}") || nil
-        end.compact
-      end.uniq
+      Chef::Log.debug("Writing #{rule_type} rules")
+      rules.map do |r|
+        (r[:type] == rule_type &&
+          "#{r[:type]} #{r[:args]}") || nil
+      end.compact.uniq
     end
 
     def routing_rules
-      Chef::Log.debug("Frontend #{name} SSL setting: #{ssl.inspect}")
-      # rubocop:disable Style/EachWithObject
-      output = @applications.reduce([]) do |rules, app|
-        rules << routing_rule(app)
-        case
-        when prevent_ssl_redirect?(app)
-          Chef::Log.debug("#{app.name} prevent_ssl_redirect: true")
-          rules += app.block_rules
-        when app.access_control? &&
-          !app.block_acl_sets(type: 'ip').empty? &&
-          !prevent_ssl_redirect?(app)
-          Chef::Log.debug("#{app.name} IP-based block rules: true")
-          rules += app.block_rules(type: 'ip')
-        end
-        rules
-      end.compact
-      # rubocop:enable Style/EachWithObject
-      Chef::Log.debug "routing_rules output: #{output.inspect}"
-      output
+      @routing_rules ||= begin
+        Chef::Log.debug("Frontend #{name} SSL setting: #{ssl.inspect}")
+        # rubocop:disable Style/EachWithObject
+        output = @applications.reduce([]) do |rules, app|
+          rules << routing_rule(app)
+          case
+          when prevent_ssl_redirect?(app)
+            Chef::Log.debug("#{app.name} prevent_ssl_redirect: true")
+            rules += app.block_rules
+          when app.access_control? &&
+            !app.block_acl_sets(type: 'ip').empty? &&
+            !prevent_ssl_redirect?(app)
+            Chef::Log.debug("#{app.name} IP-based block rules: true")
+            rules += app.block_rules(type: 'ip')
+          end
+          rules
+        end.compact
+        # rubocop:enable Style/EachWithObject
+        Chef::Log.debug "routing_rules output: #{output.inspect}"
+        output
+      end
     end
 
     def method_missing(sym, *args, &block)
