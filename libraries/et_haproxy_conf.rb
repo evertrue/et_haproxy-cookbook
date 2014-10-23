@@ -32,6 +32,11 @@ module EtHaproxy
       @conf['acls'].map { |name, conf| EtHaproxy::Acl.new(name, conf) }
     end
 
+    def auto_cluster_acls
+      Chef::Log.debug("Using this value for auto_clusters: #{auto_clusters.inspect}")
+      auto_clusters.map { |_c_name, c_data| c_data['acls'] }.flatten
+    end
+
     def endpoint_only_acls
       applications.map do |app|
         next unless app.simple_endpoint?
