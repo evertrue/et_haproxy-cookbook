@@ -40,9 +40,7 @@ module EtHaproxy
     end
 
     def host_acls
-      acls.select do |acl|
-        acl.type == 'hdr(host)'
-      end
+      acls.select(&:host?)
     end
 
     def vpn_rules(redirect_port)
