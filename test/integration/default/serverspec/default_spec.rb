@@ -437,7 +437,7 @@ describe 'HAProxy log rotation' do
       '/var/log/haproxy.log',
       '100M',
       'daily',
-      'rotate 50',
+      'rotate 500',
       'sharedscripts',
       'compress',
       'notifempty',

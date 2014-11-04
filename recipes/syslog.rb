@@ -25,7 +25,7 @@ logrotate_app 'haproxy' do
   path node['haproxy']['syslog']['file']
   size '100M'
   frequency 'daily'
-  rotate 50
+  rotate 500
   sharedscripts true
   options %w(compress notifempty missingok)
   create '644 root adm'
