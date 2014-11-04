@@ -1,5 +1,5 @@
 module EtHaproxy
-  # rubocop:disable Style/ClassLength
+  # rubocop:disable Metrics/ClassLength
   class Application
     attr_reader :name
     attr_accessor :options
@@ -36,7 +36,7 @@ module EtHaproxy
       end
     end
 
-    # rubocop:disable Style/CyclomaticComplexity
+    # rubocop:disable Metrics/CyclomaticComplexity
     def block_acl_sets(options = {})
       o = []
       if endpoint?
@@ -57,7 +57,7 @@ module EtHaproxy
       end
       o
     end
-    # rubocop:enable Style/CyclomaticComplexity
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def allowed_set
       o = []
@@ -154,5 +154,5 @@ module EtHaproxy
       super(sym, include_private)
     end
   end
-  # rubocop:enable Style/ClassLength
+  # rubocop:enable Metrics/ClassLength
 end
