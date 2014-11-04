@@ -2,6 +2,13 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.4.0 (2014-11-04)
+-------------------
+
+* Increase number of HAProxy logs kept on-disk
+    - This is possible due to the fact that we take advantage of additional storage, typically mounted to `/mnt/dev0` by the `storage` cookbook
+* Refactor to use the `newrelic_meetme_plugin` cookbook for tracking HAProxy stats
+
 v3.3.3 (2014-10-21)
 -------------------
 
