@@ -474,3 +474,19 @@ describe 'stunnel service' do
     it { should be_enabled }
   end
 end
+
+describe 'New Relic HAProxy monitoring' do
+  describe file '/etc/newrelic/newrelic-plugin-agent.cfg' do
+    describe '#content' do
+      subject { super().content }
+      # TODO: This does not work b/c of some bizarre attribute precedence
+      it { is_expected.to include 'TESTKEY_PLUGIN_AGENT' }
+      it { is_expected.to include 'haproxy' }
+    end
+  end
+
+  describe service 'newrelic-plugin-agent' do
+    it { is_expected.to_not be_running }
+    it { is_expected.to be_enabled }
+  end
+end

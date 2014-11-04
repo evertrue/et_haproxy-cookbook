@@ -7,18 +7,18 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# Install the New Relic repository, system monitor, & Plugin Agent
-include_recipe 'newrelic-ng'
-include_recipe 'newrelic-ng::plugin-agent-default'
+# Settings for MeetMe Plugin Agent
+node.set['newrelic_meetme_plugin']['services'] = {
+  'haproxy' => {
+    'name'   => node.name,
+    'host'   => 'localhost',
+    'port'   => node['haproxy']['stats']['port'],
+    'path'   => node['haproxy']['stats']['uri'],
+    'scheme' => 'http',
+    'username' => node['haproxy']['stats']['admin_user'],
+    'password' => node['haproxy']['stats']['admin_password']
+  }
+}
 
-# Pass along YAML settings for Plugin Agent for Apache & APC
-node.set['newrelic-ng']['plugin-agent']['service_config'] = <<-EOS
-haproxy:
-  name: #{node.name}
-  host: localhost
-  port: #{node['haproxy']['stats']['port']}
-  path: #{node['haproxy']['stats']['uri']}
-  scheme: http
-  username: #{node['haproxy']['stats']['admin_user']}
-  password: #{node['haproxy']['stats']['admin_password']}
-EOS
+# Install & configure the New Relic MeetMe Plugin Agent
+include_recipe 'newrelic_meetme_plugin'

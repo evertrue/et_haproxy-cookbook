@@ -35,6 +35,7 @@ suites:
     - recipe[et_hostname]
     - recipe[et_users]
     - recipe[et_haproxy]
+    - recipe[et_haproxy::newrelic]
   attributes:
     et_hostname:
       addl_hosts_entries:
@@ -118,3 +119,8 @@ suites:
           - name: stage-api-1
             fqdn: stage-api-1.priv.evertrue.com
             port: '8080'
+    newrelic_meetme_plugin:
+      license: TESTKEY_PLUGIN_AGENT
+      service_notify_action: nothing
+      service_actions:
+        - enable
