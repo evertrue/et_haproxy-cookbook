@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: et_www
+# Cookbook Name:: et_haproxy
 # Recipe:: newrelic
 #
 # Copyright (C) 2013 EverTrue, Inc.
