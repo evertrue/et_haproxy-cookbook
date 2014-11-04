@@ -82,23 +82,23 @@ describe 'Configuration' do
     context 'header replacement' do
       it 'should have reqidel X-Forwarded-Proto in SSL section' do
         should contain('  reqidel ^X-Forwarded-Proto:.*')
-            .after(/^frontend main_ssl$/)
-            .before(/^  # backend rules/)
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
       end
       it 'should have reqadd X-Forwarded-Proto in SSL section' do
         should contain('  reqadd   X-Forwarded-Proto:\ https')
-            .after(/^frontend main_ssl$/)
-            .before(/^  # backend rules/)
+          .after(/^frontend main_ssl$/)
+          .before(/^  # backend rules/)
       end
       it 'should not have reqidel X-Forwarded-Proto in non-SSL section' do
         should_not contain('  reqidel ^X-Forwarded-Proto:.*')
-            .after(/^frontend main$/)
-            .before(/^frontend main_ssl$/)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
       end
       it 'should not have reqadd X-Forwarded-Proto in non-SSL section' do
         should_not contain('  reqadd   X-Forwarded-Proto:\ https')
-            .after(/^frontend main$/)
-            .before(/^frontend main_ssl$/)
+          .after(/^frontend main$/)
+          .before(/^frontend main_ssl$/)
       end
     end
 
