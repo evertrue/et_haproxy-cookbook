@@ -2,6 +2,12 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v3.4.1 (2014-11-05)
+-------------------
+
+* Adjust attribute level for New Relic license to better test
+* Add more assertions for `newrelic` recipe
+
 v3.4.0 (2014-11-04)
 -------------------
 
