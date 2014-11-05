@@ -476,12 +476,19 @@ describe 'stunnel service' do
 end
 
 describe 'New Relic HAProxy monitoring' do
+  describe package('newrelic-plugin-agent') do
+    it { should be_installed.by('pip') }
+  end
+
   describe file '/etc/newrelic/newrelic-plugin-agent.cfg' do
     describe '#content' do
       subject { super().content }
       # TODO: This does not work b/c of some bizarre attribute precedence
-      it { is_expected.to include 'TESTKEY_PLUGIN_AGENT' }
+      it { is_expected.to include 'license_key: TESTKEY_PLUGIN_AGENT' }
       it { is_expected.to include 'haproxy' }
+      it { is_expected.to include "port: '8069'" }
+      it { is_expected.to include 'path: /stats' }
+      it { is_expected.to include 'scheme: http' }
     end
   end
 
