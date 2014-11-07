@@ -6,10 +6,10 @@ group :test, :development do
 end
 
 group :test do
-  gem 'berkshelf',  '~> 3.1.5'
+  gem 'berkshelf',  '~> 3.2'
   gem 'chefspec',   '~> 4.1'
   gem 'foodcritic', '~> 4.0'
-  gem 'rubocop',    '~> 0.26'
+  gem 'rubocop',    '~> 0.27'
   gem 'serverspec', '~> 2.3'
 
   gem 'fog', '~> 1.24'
