@@ -26,7 +26,16 @@ suites:
     - recipe[et_hostname]
     - recipe[et_users]
     - recipe[et_haproxy]
+    - recipe[java]
+    - recipe[zookeeper]
+    - recipe[zookeeper::service]
+    - recipe[et_haproxy::baragon-server]
+    - recipe[et_haproxy::baragon-agent]
   attributes:
+    java:
+      jdk_version: 7
+    zookeeper:
+      service_style: upstart
     et_hostname:
       addl_hosts_entries:
         - 10.4.0.2 stage-hadoop-nn-1b

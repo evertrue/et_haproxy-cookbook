@@ -1,5 +1,5 @@
-source 'https://supermarket.getchef.com'
 source 'https://berks.evertrue.com'
+source 'https://supermarket.getchef.com'
 
 metadata
 
@@ -14,3 +14,6 @@ group :integration do
   cookbook 'et_logger', '~> 3.1'
            # path: '../et_logger'
 end
+
+# cookbook 'et_zookeeper', path: '../et_zookeeper'
+cookbook 'zookeeper', path: '../../../other/chef-zookeeper'
