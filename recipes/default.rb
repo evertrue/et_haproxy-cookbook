@@ -12,6 +12,8 @@ fail 'This recipe requires chef-client version 11.10.4 or higher' if Chef::VERSI
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+chef_gem 'rest-client'
+
 # Include helper code
 class ::Chef
   class Resource
