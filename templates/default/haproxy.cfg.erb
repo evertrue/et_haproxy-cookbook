@@ -84,9 +84,18 @@ frontend <%= fe.name %>
   <%
         end # @trusted_networks[ac_set].each_slice(max_line_length).each do |ip_slice|
       end # node['haproxy']['access_control']['sets'].each do |ac_set|
+
+      if node['haproxy']['access_control']['use_eips']
   -%>
   acl src_access_control_eips hdr_ip(X-Forwarded-For) <%= @eips.sort.join(' ') %>
+  <%
+      end
+      if node['haproxy']['access_control']['use_instance_ips']
+  -%>
   acl src_access_control_instance_ext_ips hdr_ip(X-Forwarded-For) <%= @instance_ext_ips.join(' ') %>
+  <%
+      end
+  -%>
 
   #
   # Routing acls

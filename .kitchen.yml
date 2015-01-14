@@ -37,6 +37,12 @@ suites:
     nginx:
       port: 8123
     haproxy:
+      access_control:
+        use_eips: false
+        use_instance_ips: false
+        sets:
+        - global
+        - local
       acls:
         host-api:
           type: hdr(host)
