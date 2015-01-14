@@ -2,6 +2,19 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v4.0.0 (2014-10-21)
+-------------------
+
+* Bump et_security to 1.2
+* Make the inclusion of access control IPs in the haproxy config file optional
+* Install rest-client Gem (needed for Chef 12 compatibility)
+* Bring cloud test attributes into line with local test attributes; Turn access control off for several applications
+* Remove coveralls, chef-zero, and serverspec; Update gems for test-kitchen and kitchen-ec2
+* Update the gem lock file
+* Bump a bunch of test library versions
+* Test to make sure reqidel/reqadd rules get added in the right place
+* Call individual routing rules sections one at a time so that we can put reqidel/reqadd lines after block lines and before redirect lines
+
 v3.4.2 (2014-11-05)
 -------------------
 
