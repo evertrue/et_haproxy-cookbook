@@ -46,18 +46,27 @@ suites:
       port: 8123
     haproxy:
       acls:
-        host_stage-api:
-          type: hdr_beg(host)
-          match: stage-api.evertrue.com
+        host-api:
+          type: hdr(host)
+          match: api.local
         uri_search:
           type: path_beg
           match: /search
-        # host_test_reg:
-        #   type: hdr_reg(host)
-        #   match: who_cares_should_fail
-        host_test_host:
+        host-block:
           type: hdr(host)
-          match: test.evertrue.com
+          match: block.local
+        one_more_rule:
+          type: path_beg
+          match: /one_more_rule
+        exempt_from_access_control:
+          type: hdr(host)
+          match: access-control-exempt.local
+        uri_host_without_endpoint:
+          type: path
+          match: /uri_host_without_endpoint
+        uri_ssl-redirect-host-with-endpoint:
+          type: path
+          match: /uri_ssl-redirect-host-with-endpoint
       frontends:
         vpn_fe:
           vpn: true
@@ -75,49 +84,119 @@ suites:
           - '8443'
           ssl: true
       applications:
-        searchapi-stage:
+        host-endpoint-only:
+          endpoint: hostendpointonly.local
+          ssl_enabled: false
+          backend: host-endpoint-only
+        host-with-endpoint:
           acls:
-          - - host_stage-api
+          - - host-api
             - uri_search
-          # - - host_test_reg
-          - - host_test_host
+          - - host-api
+            - one_more_rule
+          endpoint: host-with-endpoint.local
+          ssl_enabled: false
+          backend: host-with-endpoint
+        host-without-endpoint:
+          acls:
+          - - host-api
+            - uri_search
+            - one_more_rule
+          ssl_enabled: false
+          backend: host-without-endpoint
+        ssl-host-with-endpoint:
+          acls:
+          - - host-api
+            - uri_search
+          endpoint: ssl-host-with-endpoint.local
+          ssl_enabled: true
+          ssl_disable_redirect: true
+          ssl_required: true
+          backend: ssl-host-with-endpoint
+        ssl-redirect-host-with-endpoint:
+          acls:
+          - - host-api
+            - uri_search
+            - uri_ssl-redirect-host-with-endpoint
+          endpoint: ssl-redirect-host-with-endpoint.local
+          ssl_enabled: true
+          ssl_disable_redirect: false
+          ssl_required: true
+          backend: ssl-redirect-host-with-endpoint
+        ssl-host-without-endpoint:
+          acls:
+          - - host-api
+            - uri_search
+            - uri_host_without_endpoint
           access_control: true
           allowed:
             host_groups:
             - set_global
             - eips
             - instance_ext_ips
-          endpoint: stage-searchapi.evertrue.com
           ssl_enabled: true
           ssl_disable_redirect: true
           ssl_required: true
-          backend: searchapi-stage
+          backend: ssl-host-without-endpoint
         just-block:
           acls:
-          - - hdr_etapptoken
-          - - uri_param_etapptoken
+          - - uri_search
+            - host-block
           allowed:
             host_groups:
             - set_global
             - eips
             - instance_ext_ips
           ssl_enabled: true
-          access_control: false
+          access_control: true
       backends:
-        searchapi-stage:
+        host-endpoint-only:
           balance_algorithm: roundrobin
           check_req:
+            always: true
             method: OPTIONS
             url: /search/
           port: '8080'
-          servers_recipe: et_search_api
-        legacyapi-stage:
+          servers_recipe: et_generic_api::default
+        host-with-endpoint:
+          balance_algorithm: roundrobin
+          check_req:
+            always: false
+          servers:
+          - name: stage-api-1
+            fqdn: stage-api-1.local
+            port: '8080'
+          - name: stage-api-2
+            fqdn: stage-api-2.local
+            port: '8080'
+        host-without-endpoint:
+          port: '8080'
+          servers_recipe: et_generic_api
+        ssl-host-with-endpoint:
           balance_algorithm: roundrobin
           check_req:
             always: true
           servers:
           - name: stage-api-1
-            fqdn: stage-api-1.priv.evertrue.com
+            fqdn: stage-api-1.local
+            port: '8080'
+          - name: stage-api-2
+            fqdn: stage-api-2.local
+            port: '8080'
+        ssl-redirect-host-with-endpoint:
+          balance_algorithm: roundrobin
+          check_req:
+            method: OPTIONS
+            url: /search/
+          port: '8080'
+          servers_recipe: et_generic_api_cluster
+        ssl-host-without-endpoint:
+          balance_algorithm: roundrobin
+          check_req:
+            always: true
+          servers:
+          - name: stage-api-1
+            fqdn: stage-api-1.local
             port: '8080'
     newrelic_meetme_plugin:
       license: TESTKEY_PLUGIN_AGENT

@@ -77,14 +77,6 @@ suites:
           ssl: true
       applications:
         host-endpoint-only:
-          access_control: true
-          allowed:
-            host_groups:
-            - set_global
-            - eips
-            - instance_ext_ips
-            acls:
-            - exempt_from_access_control
           endpoint: hostendpointonly.local
           ssl_enabled: false
           backend: host-endpoint-only
@@ -94,14 +86,6 @@ suites:
             - uri_search
           - - host-api
             - one_more_rule
-          access_control: true
-          allowed:
-            host_groups:
-            - set_global
-            - eips
-            - instance_ext_ips
-            acls:
-            - exempt_from_access_control
           endpoint: host-with-endpoint.local
           ssl_enabled: false
           backend: host-with-endpoint
@@ -110,24 +94,12 @@ suites:
           - - host-api
             - uri_search
             - one_more_rule
-          access_control: true
-          allowed:
-            host_groups:
-            - set_global
-            - eips
-            - instance_ext_ips
           ssl_enabled: false
           backend: host-without-endpoint
         ssl-host-with-endpoint:
           acls:
           - - host-api
             - uri_search
-          access_control: true
-          allowed:
-            host_groups:
-            - set_global
-            - eips
-            - instance_ext_ips
           endpoint: ssl-host-with-endpoint.local
           ssl_enabled: true
           ssl_disable_redirect: true
@@ -138,12 +110,6 @@ suites:
           - - host-api
             - uri_search
             - uri_ssl-redirect-host-with-endpoint
-          access_control: true
-          allowed:
-            host_groups:
-            - set_global
-            - eips
-            - instance_ext_ips
           endpoint: ssl-redirect-host-with-endpoint.local
           ssl_enabled: true
           ssl_disable_redirect: false
