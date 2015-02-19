@@ -138,8 +138,6 @@ suites:
           allowed:
             host_groups:
             - set_global
-            - eips
-            - instance_ext_ips
           ssl_enabled: true
           ssl_disable_redirect: true
           ssl_required: true
@@ -151,8 +149,6 @@ suites:
           allowed:
             host_groups:
             - set_global
-            - eips
-            - instance_ext_ips
           ssl_enabled: true
           access_control: true
       backends:
