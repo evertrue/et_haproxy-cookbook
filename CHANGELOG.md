@@ -2,6 +2,16 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v4.0.1 (2015-02-19)
+-------------------
+
+* Update unit tests to reflect new settings in kitchen yaml
+* Add quotes to newrelic stats path specification in unit test
+* Fix be_enabled line for rsyslog test to include runlevel
+* Remove unused access control lists from application allowed hashes
+* Change namespace for secure_password method to OpenSSLCookbook
+* Fix the way Chef version constraints are tested
+
 v4.0.0 (2014-10-21)
 -------------------
 
