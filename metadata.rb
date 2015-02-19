@@ -7,7 +7,7 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '4.0.0'
 
 depends 'apt'
-depends 'openssl'
+depends 'openssl', '~> 3.0'
 depends 'logrotate', '~> 1.5'
 depends 'et_fog', '~> 1.0'
 depends 'stunnel', '~> 2.0'
