@@ -487,7 +487,7 @@ describe 'New Relic HAProxy monitoring' do
       it { is_expected.to include 'license_key: TESTKEY_PLUGIN_AGENT' }
       it { is_expected.to include 'haproxy' }
       it { is_expected.to include "port: '8069'" }
-      it { is_expected.to include 'path: /stats;csv' }
+      it { is_expected.to include 'path: "/stats;csv"' }
       it { is_expected.to include 'scheme: http' }
     end
   end
