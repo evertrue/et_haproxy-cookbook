@@ -8,7 +8,9 @@
 # All rights reserved - Do Not Redistribute
 #
 
-fail 'This recipe requires chef-client version 11.10.4 or higher' if Chef::VERSION < '11.10.4'
+if Chef::VersionConstraint.new('< 11.10.4').include? Chef::VERSION
+  fail 'This recipe requires chef-client version 11.10.4 or higher'
+end
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
