@@ -425,7 +425,7 @@ describe 'Syslog Service' do
   end
 
   describe service('rsyslog') do
-    it { should be_enabled }
+    it { should be_enabled.with_level('filesystem') }
     it { should be_running }
   end
 end
