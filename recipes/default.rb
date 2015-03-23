@@ -33,8 +33,8 @@ include_recipe 'apt' if node['platform_family'] == 'debian'
 
 include_recipe 'et_haproxy::syslog'
 include_recipe 'et_fog'
+include_recipe 'et_haproxy::install'
 
-package 'haproxy'
 package 'curl' # for testing
 
 file '/etc/default/haproxy' do
