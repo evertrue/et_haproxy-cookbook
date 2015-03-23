@@ -54,13 +54,13 @@ end
 # This is necessary because haproxy's service command returns 0
 # even if the config file syntax is broken.
 execute 'haproxy_config_verify' do
-  command '/usr/sbin/haproxy -c -f /etc/haproxy/haproxy.cfg'
+  command "/usr/sbin/haproxy -c -f #{node['haproxy']['conf_dir']}/haproxy.cfg"
   action :nothing
 end
 
 trusted_networks_obj = data_bag_item('access_control', 'trusted_networks')
 
-template '/etc/haproxy/haproxy.cfg' do
+template "#{node['haproxy']['conf_dir']}/haproxy.cfg" do
   source 'haproxy.cfg.erb'
   owner 'root'
   group 'root'
@@ -75,14 +75,14 @@ template '/etc/haproxy/haproxy.cfg' do
   notifies :reload, 'service[haproxy]'
 end
 
-directory '/etc/haproxy/custom-errorfiles' do
+directory "#{node['haproxy']['conf_dir']}/custom-errorfiles" do
   owner 'root'
   group 'root'
   mode 0755
   action :create
 end
 
-cookbook_file '/etc/haproxy/custom-errorfiles/403.http' do
+cookbook_file "#{node['haproxy']['conf_dir']}/custom-errorfiles/403.http" do
   source 'custom-errorfiles/403.http'
   owner 'root'
   group 'root'
