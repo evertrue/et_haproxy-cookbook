@@ -49,12 +49,8 @@ frontend <%= fe.name %>
   #
   # vpn endpoint
   #
+  redirect scheme https code 301
   <%
-      haproxy_conf.vpn_rules(fe.redirect_port).each do |rule|
-  -%>
-  <%= rule %>
-  <%
-      end # haproxy_conf.vpn_rules(fe.redirect_port).each do |rule|
     else # if fe.vpn?
       unless fe.conf['disable_x_forwarded_for']
   -%>

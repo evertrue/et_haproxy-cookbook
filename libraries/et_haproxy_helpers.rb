@@ -249,7 +249,7 @@ module EtHaproxy
       redirects.map do |ssl_redirect|
         output = ''
         if ssl_redirect['redirect_permitted'] == true
-          output = 'redirect prefix https://' + ssl_redirect['fqdn']
+          output = 'redirect scheme https code 301'
         else
           output = 'block'
         end
