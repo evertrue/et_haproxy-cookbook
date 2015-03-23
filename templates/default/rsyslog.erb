@@ -14,4 +14,8 @@ if ( \
 then <%= node['haproxy']['syslog']['file'] %>
 
 # Log no further...
+<% if node['platform_version'] >= '14.04' -%>
+stop
+<% else -%>
 & ~
+<% end -%>
