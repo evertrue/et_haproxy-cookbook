@@ -28,6 +28,6 @@ logrotate_app 'haproxy' do
   rotate 500
   sharedscripts true
   options %w(compress notifempty missingok)
-  create '644 root adm'
+  create "644 #{node['rsyslog']['user']} #{node['rsyslog']['group']}"
   postrotate 'reload rsyslog > /dev/null 2>&1 || true'
 end
