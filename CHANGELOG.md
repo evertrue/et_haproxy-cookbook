@@ -2,6 +2,32 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v5.0.0 (2015-03-31)
+-------------------
+Breaking
+========
+* Move default log location to /var/log/haproxy/haproxy.log (to address permissions issues)
+
+Other
+=====
+* Use "greater than" version constraint on et_logger
+* The default log location was moved to /var/log/haproxy/haproxy.log; update integration tests to suit
+* Use local instead of priv.evertrue.com in hosts file entries
+* Add a comment explaining node['storage']
+* Log to the ephemeral mount drive (if one exists)
+* Remove /etc/rsyslog.d/haproxy.conf instead of /etc/rsyslog.d/30-haproxy.conf
+* Move haproxy service definition to after templates and directories
+* Install syslog before haproxy package
+* Install build-essential
+* Include et_logger recipe on cloud tests
+* Do not separately include apt in test kitchen run list
+* Give the cloud-based test suites a unique name so that they have their own tests
+* Test on Ubuntu 14.04
+* Use different rsyslog "discard" syntax on Ubuntu 14.04 or later
+* Switch to attribute conf dir location
+* Create new log files with rsyslog user and group ownership instead of root/adm
+* Test on ruby version 2.1.4
+
 v4.0.1 (2015-02-19)
 -------------------
 
