@@ -51,11 +51,6 @@ file '/etc/default/haproxy' do
           'ENABLED=1'
 end
 
-service 'haproxy' do
-  supports restart: true, status: true, reload: true
-  action [:enable, :start]
-end
-
 # This is necessary because haproxy's service command returns 0
 # even if the config file syntax is broken.
 execute 'haproxy_config_verify' do
@@ -77,7 +72,6 @@ template "#{node['haproxy']['conf_dir']}/haproxy.cfg" do
     instance_ext_ips: instance_ext_ips(node['haproxy']['aws_api_user'])
   )
   notifies :run, 'execute[haproxy_config_verify]'
-  notifies :reload, 'service[haproxy]'
 end
 
 directory "#{node['haproxy']['conf_dir']}/custom-errorfiles" do
@@ -92,6 +86,13 @@ cookbook_file "#{node['haproxy']['conf_dir']}/custom-errorfiles/403.http" do
   owner 'root'
   group 'root'
   mode 0644
+end
+
+service 'haproxy' do
+  supports restart: true, status: true, reload: true
+  action [:enable, :start]
+  subscribes :reload, "template[#{node['haproxy']['conf_dir']}/haproxy.cfg]"
+  subscribes :reload, "cookbook_file[#{node['haproxy']['conf_dir']}/custom-errorfiles/403.http]"
 end
 
 package 'socat'
