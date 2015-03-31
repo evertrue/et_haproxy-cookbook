@@ -4,7 +4,7 @@ service 'rsyslog' do
   action [:nothing]
 end
 
-file '/etc/rsyslog.d/30-haproxy.conf' do
+file '/etc/rsyslog.d/haproxy.conf' do
   action :delete
 end
 
