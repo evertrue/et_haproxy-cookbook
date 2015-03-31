@@ -338,12 +338,16 @@ describe 'Syslog Service' do
     it { should be_mode '644' }
     its(:content) { should match(/if \( \\\s+\(\$syslogfacility-text == 'local0'\) and \\/) }
     its(:content) { should match(/\s+\(\$programname == 'haproxy'\) \\\s+\) \\/) }
-    its(:content) { should match(%r{then /var/log/haproxy.log\s+# Log no further\.\.\.\s+& ~}) }
+    its(:content) { should match(%r{then /var/log/haproxy/haproxy.log\s+# Log no further\.\.\.\s+& ~}) }
   end
 
   describe service('rsyslog') do
     it { should be_enabled.with_level('filesystem') }
     it { should be_running }
+  end
+
+  describe file('/var/log/haproxy/haproxy.log') do
+    it { is_expected.to contain(/Proxy stats started/) }
   end
 end
 
@@ -351,7 +355,7 @@ describe 'HAProxy log rotation' do
   describe file '/etc/logrotate.d/haproxy' do
     it { should be_file }
     [
-      '/var/log/haproxy.log',
+      '/var/log/haproxy/haproxy.log',
       '100M',
       'daily',
       'rotate 500',
