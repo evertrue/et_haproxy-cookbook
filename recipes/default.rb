@@ -36,11 +36,11 @@ end
 
 node.set_unless['haproxy']['stats']['admin_password'] = secure_password
 
-include_recipe 'et_haproxy::syslog'
-include_recipe 'et_fog'
-
 package 'haproxy'
 package 'curl' # for testing
+
+include_recipe 'et_haproxy::syslog'
+include_recipe 'et_fog'
 
 file '/etc/default/haproxy' do
   action :create
