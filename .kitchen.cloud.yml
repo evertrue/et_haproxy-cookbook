@@ -30,6 +30,8 @@ platforms:
 suites:
 - name: cloud
   run_list:
+    - recipe[storage::ec2test]
+    - recipe[storage::default]
     - recipe[et_logger]
     - recipe[et_nginx::default]
     - recipe[et_hostname]

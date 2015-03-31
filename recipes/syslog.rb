@@ -8,6 +8,23 @@ file '/etc/rsyslog.d/haproxy.conf' do
   action :delete
 end
 
+log_prefix = ''
+
+if node['storage'] &&
+   node['storage']['ephemeral_mounts']
+  log_prefix = node['storage']['ephemeral_mounts'].first
+end
+
+node.set['haproxy']['syslog']['file'] = "#{log_prefix}/var/log/haproxy/haproxy.log"
+
+directory File.dirname(node['haproxy']['syslog']['file']) do
+  owner     node['rsyslog']['user']
+  group     node['rsyslog']['group']
+  mode      0755
+  action    :create
+  recursive true
+end
+
 template "#{node['rsyslog']['config_prefix']}/rsyslog.d/45-haproxy.conf" do
   source 'rsyslog.erb'
   owner 'root'
