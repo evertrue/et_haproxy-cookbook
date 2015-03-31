@@ -43,7 +43,8 @@ suites:
       addl_hosts_entries:
         - 10.4.0.2 stage-hadoop-nn-1b
         - 10.4.0.3 stage-logs-1b
-        - 10.4.0.4 stage-api-1.priv.evertrue.com
+        - 10.4.0.4 stage-api-1.local
+        - 10.4.0.4 stage-api-2.local
     nginx:
       port: 8123
     haproxy:
