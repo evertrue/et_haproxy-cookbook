@@ -20,11 +20,11 @@ provisioner:
     environment: dev
 
 platforms:
-- name: ubuntu-12.04
+- name: ubuntu-14.04
   driver_config:
-    image_id: ami-36aa4d5e
+    image_id: ami-d0ba0cb8
     tags:
-      Name: travis-ci-default-ubuntu-1204
+      Name: travis-ci-default-ubuntu-1404
       Env: public
 
 suites:
