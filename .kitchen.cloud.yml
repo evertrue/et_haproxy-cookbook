@@ -28,7 +28,7 @@ platforms:
       Env: public
 
 suites:
-- name: default
+- name: cloud
   run_list:
     - recipe[apt::default]
     - recipe[et_nginx::default]
