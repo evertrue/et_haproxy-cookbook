@@ -10,6 +10,7 @@ end
 
 log_prefix = ''
 
+# node['storage'] comes from the "storage" cookbook which is optional.
 if node['storage'] &&
    node['storage']['ephemeral_mounts']
   log_prefix = node['storage']['ephemeral_mounts'].first
