@@ -14,6 +14,13 @@ end
 
 ::Chef::Recipe.send(:include, OpenSSLCookbook::Password)
 
+# Required for grabbing IPs to whitelist from Pingdom
+if platform_family?('debian')
+  include_recipe 'apt'
+  resources(execute: 'apt-get update').run_action(:run)
+end
+
+include_recipe 'build-essential'
 chef_gem 'rest-client'
 
 # Include helper code
@@ -28,8 +35,6 @@ end
 ::EtHaproxy::Helpers.validate node['haproxy']
 
 node.set_unless['haproxy']['stats']['admin_password'] = secure_password
-
-include_recipe 'apt' if node['platform_family'] == 'debian'
 
 include_recipe 'et_haproxy::syslog'
 include_recipe 'et_fog'
