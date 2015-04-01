@@ -9,11 +9,20 @@ file '/etc/rsyslog.d/haproxy.conf' do
 end
 
 log_prefix = ''
+rotate_qty = 500
 
 # node['storage'] comes from the "storage" cookbook which is optional.
 if node['storage'] &&
    node['storage']['ephemeral_mounts']
   log_prefix = node['storage']['ephemeral_mounts'].first
+
+  rotate_qty = (
+    _log_fs_name, log_fs = node['filesystem'].find do |_fs, fs_conf|
+      fs_conf['mount'] == log_prefix
+    end
+
+    (log_fs['kb_size'].to_i / 1024 / node['haproxy']['log_size_megs'] * 0.70).to_i
+  )
 end
 
 node.set['haproxy']['syslog']['file'] = "#{log_prefix}/var/log/haproxy/haproxy.log"
@@ -41,9 +50,9 @@ end
 logrotate_app 'haproxy' do
   cookbook 'logrotate'
   path node['haproxy']['syslog']['file']
-  size '100M'
+  size "#{node['haproxy']['log_size_megs']}M"
   frequency 'daily'
-  rotate 500
+  rotate rotate_qty
   sharedscripts true
   options %w(compress notifempty missingok)
   create "644 #{node['rsyslog']['user']} #{node['rsyslog']['group']}"

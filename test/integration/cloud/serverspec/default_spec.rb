@@ -358,13 +358,15 @@ describe 'HAProxy log rotation' do
       '/mnt/dev0/var/log/haproxy/haproxy.log',
       '100M',
       'daily',
-      'rotate 500',
       'sharedscripts',
       'compress',
       'notifempty',
       'missingok',
       'reload rsyslog > /dev/null 2>&1 || true'
     ].each { |contents| its(:content) { should include contents } }
+  end
+  describe file '/etc/logrotate.d/haproxy' do
+    it { is_expected.to contain(/rotate [0-9]\+/) }
   end
 end
 
