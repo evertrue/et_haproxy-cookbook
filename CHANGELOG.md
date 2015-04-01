@@ -2,6 +2,10 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v5.0.1 (2015-04-01)
+-------------------
+* Set number of logs to keep based on available disk space
+
 v5.0.0 (2015-03-31)
 -------------------
 Breaking
