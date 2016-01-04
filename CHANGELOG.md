@@ -2,6 +2,10 @@ et_haproxy cookbook CHANGELOG
 ============================
 This file is used to list changes made in each version of the et_haproxy cookbook.
 
+v5.0.3 (2016-01-04)
+-------------------
+* Drop Pingdom API-based IP whitelisting
+
 v5.0.2 (2015-04-06)
 -------------------
 * Update `newrelic_meetme_plugin` cookbook to ~> 0.2.0
