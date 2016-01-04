@@ -48,11 +48,6 @@ module EtHaproxy
         end
       end
 
-      # Add Pingdom IPs to global whitelist
-      pingdom_ips.each do |ip|
-        ips['global'] += IPAddress(ip).map(&:address)
-      end
-
       ips
     end
 
@@ -280,28 +275,6 @@ module EtHaproxy
       output += ' ' + be_conf['server_options'].join(' ') if be_conf['server_options']
 
       output
-    end
-
-    # Return an array of IPs from the Pingdom API response
-    def pingdom_ips
-      require 'rest-client'
-      require 'cgi'
-      require 'json'
-
-      pingdom_creds = Chef::EncryptedDataBagItem.load('secrets', 'api_keys')['pingdom']
-
-      user    = pingdom_creds['user']
-      pass    = pingdom_creds['pass']
-      app_key = pingdom_creds['app_key']
-      url     = "https://#{CGI.escape user}:#{CGI.escape pass}@api.pingdom.com/api/2.0/probes"
-      ips     = []
-
-      res = RestClient.get(url, 'App-Key' => app_key, 'onlyactive' => true)
-      res = JSON.parse(res.body, symbolize_names: true)
-
-      res[:probes].each { |item| ips << item[:ip] }
-
-      ips
     end
   end
 end
