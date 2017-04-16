@@ -1,4 +1,5 @@
 module EtHaproxy
+  # rubocop:disable Style/ClassLength
   class Conf
     def initialize(conf, env)
       @conf = conf
@@ -7,22 +8,33 @@ module EtHaproxy
 
     def frontends
       @conf['frontends'].map do |name, conf|
-        EtHaproxy::Frontend.new(name, conf, applications)
+        EtHaproxy::Frontend.new(name,
+                                conf,
+                                applications)
       end
     end
 
     def backends
-      @conf['backends'].map do |name, conf|
-        EtHaproxy::Backend.new(
-          name,
-          conf,
-          recipe_clusters
-        )
+      static = @conf['backends'].map do |name, conf|
+        EtHaproxy::Backend.new(name,
+                               conf,
+                               recipe_clusters)
       end
+      automatic = auto_clusters.map do |name, conf|
+        Chef::Log.debug("Setting up backend for auto cluster #{name}")
+        Chef::Log.debug("Cluster data: #{conf.inspect}")
+        EtHaproxy::Backend.new("auto_cluster_#{name}", conf)
+      end
+      static + automatic
     end
 
     def acls
       @conf['acls'].map { |name, conf| EtHaproxy::Acl.new(name, conf) }
+    end
+
+    def auto_cluster_acls
+      Chef::Log.debug("Using this value for auto_clusters: #{auto_clusters.inspect}")
+      auto_clusters.map { |_c_name, c_data| c_data['acls'] }.flatten
     end
 
     def endpoint_only_acls
@@ -33,9 +45,7 @@ module EtHaproxy
     end
 
     def host_acls
-      acls.select do |acl|
-        acl.type == 'hdr(host)'
-      end
+      acls.select(&:host?)
     end
 
     def vpn_rules(redirect_port)
@@ -67,11 +77,63 @@ module EtHaproxy
 
     def applications
       @applications ||= begin
-        @conf['applications'].map do |name, conf|
+        Chef::Log.debug('Setting up these applications: ' \
+          "#{@conf['applications'].merge(auto_clusters).inspect}")
+        @conf['applications'].merge(
+          # The Application object expects string acls (not objects)
+          auto_clusters.each_with_object({}) do |(name, conf), memo|
+            memo[name] = conf.dup
+            memo[name]['acls'] =
+              memo[name]['acls'].map { |acl_and_set| acl_and_set.map(&:name) }
+          end
+        ).map do |name, conf|
           EtHaproxy::Application.new(
             name,
             conf,
-            acls
+            (acls + auto_clusters.map { |_n, c| c['acls'] }.flatten)
+          )
+        end
+      end
+    end
+
+    def hostname_acl(hostname)
+      acl = host_acls.find { |a| a.fqdn == hostname }
+      return acl unless acl.nil?
+      acl_name = "host_#{hostname.gsub('.', '-')}"
+      EtHaproxy::Acl.new(acl_name,
+                         'type' => 'hdr(host)',
+                         'match' => hostname)
+    end
+
+    def context_acl(context)
+      EtHaproxy::Acl.new("uri_#{context.gsub('/', '')}",
+                         'type' => 'path_beg',
+                         'match' => context)
+    end
+
+    def auto_clusters
+      @auto_clusters ||= begin
+        Chef::Log.info 'Gathering "auto clusters" data'
+
+        nodes = Chef::Search::Query.new.search(
+          :node,
+          "chef_environment:#{@env} AND haproxy:*"
+        ).first.select { |n| n['haproxy'].key?('cluster') }
+
+        Chef::Log.debug("Auto clusters search found: #{nodes.inspect}")
+
+        nodes.each_with_object({}) do |n, c|
+          c[n['haproxy']['cluster']['name']] = { 'servers' => [] } unless
+            c.key?(n['haproxy']['cluster']['name'])
+          c[n['haproxy']['cluster']['name']]['servers'] << n
+          c[n['haproxy']['cluster']['name']].merge!(n['haproxy']['cluster'])
+            .reject { |k, _v| k == 'name' }
+          c[n['haproxy']['cluster']['name']].merge!(
+            'backend' => "auto_cluster_#{n['haproxy']['cluster']['name']}",
+            'acls' => [[
+              hostname_acl(n['haproxy']['cluster']['hostname']),
+              context_acl(n['haproxy']['cluster']['context'])
+            ]]
           )
         end
       end
@@ -93,6 +155,7 @@ module EtHaproxy
       recipe_search_string =
         server_recipes.map { |r| 'recipes:' + r.gsub(':', '\:') }.join(' OR ')
 
+      Chef::Log.info 'Building recipe clusters hash'
       nodes = Chef::Search::Query.new.search(
         :node,
         "chef_environment:#{@env} AND (#{recipe_search_string})"
@@ -120,4 +183,5 @@ module EtHaproxy
       recipes.map { |r| r !~ /\:\:/ ? "#{r}::default" : r }.uniq
     end
   end
+  # rubocop:enable Style/ClassLength
 end

@@ -79,6 +79,27 @@ describe 'Configuration' do
       end
     end
 
+    context 'auto-cluster' do
+      it 'has acl host_dev-api-local' do
+        should contain('  acl host_dev-api-local hdr(host) -i dev-api dev-api.local')
+      end
+      it 'has acl uri_testapi' do
+        should contain('  acl uri_testapi path_beg -i /testapi')
+      end
+      it 'has use_backend rule' do
+        should contain('  use_backend auto_cluster_testapicluster if ' \
+                       'host_dev-api-local uri_testapi')
+      end
+      its(:content) do
+        should include("\nbackend auto_cluster_testapicluster\n" \
+                       "  option httpchk OPTIONS /testapi\n" \
+                       '  server dev-generic-api-cluster-1b ' \
+                       "10.0.103.252:8080 check\n" \
+                       '  server dev-generic-api-cluster-1d ' \
+                       "10.0.103.253:8080 check\n")
+      end
+    end
+
     context 'header replacement' do
       it 'should have reqidel X-Forwarded-Proto in SSL section' do
         should contain('  reqidel ^X-Forwarded-Proto:.*')

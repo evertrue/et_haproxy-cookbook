@@ -106,7 +106,12 @@ frontend <%= fe.name %>
   -%>
   <%= acl.conf_line %>
   <%
-      end # fe.acls.each do |acl|
+      end # haproxy_conf.acls.each do |acl|
+      haproxy_conf.auto_cluster_acls.each do |acl|
+  %>
+  <%= acl.conf_line %>
+  <%
+      end # haproxy_conf.auto_cluster_acls.each do |acl|
       haproxy_conf.endpoint_only_acls.each do |line|
   -%>
   <%= line %>

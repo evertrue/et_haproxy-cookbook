@@ -1,5 +1,7 @@
 module EtHaproxy
   class Server
+    DEFAULT_BACKEND_PORT = '8080'
+
     def initialize(conf, backend_conf, check_host)
       @conf = conf
       @backend_conf = backend_conf
@@ -53,7 +55,7 @@ module EtHaproxy
     end
 
     def port
-      @conf['port'] || @backend_conf['port']
+      @conf['port'] || @backend_conf['port'] || DEFAULT_BACKEND_PORT
     end
   end
 end

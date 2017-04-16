@@ -129,7 +129,7 @@ module EtHaproxy
 
     def acl_string
       output = []
-      output << acls.map { |a| a.join(' ') } if acls?
+      output << acls.map { |acl_and_set| acl_and_set.join(' ') } if acls?
       output << host_endpoint_acl_name if simple_endpoint?
       output.join(' or ')
     end

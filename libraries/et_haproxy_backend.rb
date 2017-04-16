@@ -2,7 +2,7 @@ module EtHaproxy
   class Backend
     attr_reader :name
 
-    def initialize(name, conf, recipe_clusters)
+    def initialize(name, conf, recipe_clusters = {})
       @name = name
       @conf = conf
       @recipe_clusters = recipe_clusters
@@ -13,6 +13,18 @@ module EtHaproxy
       output += options unless tcp?
       output += servers
       output
+    end
+
+    def servers_recipe
+      return @conf['servers_recipe'] if @conf['servers_recipe'] =~ /::/
+      "#{@conf['servers_recipe']}::default"
+    end
+
+    def server_count
+      count = 0
+      count += @conf['servers'].count if @conf['servers']
+      count += recipe_servers.count if servers_recipe?
+      count
     end
 
     def method_missing(sym, *args, &block)
@@ -33,31 +45,6 @@ module EtHaproxy
         sym.to_s.sub(/\?$/, '')
       )
       super(sym, include_private)
-    end
-
-    def tcp?
-      @conf.key?('tcp') && @conf['key']
-    end
-
-    def servers_recipe
-      return @conf['servers_recipe'] if @conf['servers_recipe'] =~ /::/
-      "#{@conf['servers_recipe']}::default"
-    end
-
-    # def check_req?
-    #   @conf.key?('check_req')
-    # end
-
-    # def check_req
-    #   Chef::Log.info @conf['check_req'].inspect
-    #   @conf['check_req']
-    # end
-
-    def server_count
-      count = 0
-      count += @conf['servers'].count if @conf['servers']
-      count += recipe_servers.count if servers_recipe?
-      count
     end
 
     private

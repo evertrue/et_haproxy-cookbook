@@ -4,8 +4,27 @@
   "run_list": [
     "recipe[et_generic_api_cluster]"
   ],
+  "default": {
+    "haproxy": {
+      "cluster": {
+        "name": "testapicluster",
+        "hostname": "dev-api.local",
+        "context": "/testapi",
+        "ssl_enabled": true,
+        "ssl_required": true,
+        "check_req": {
+          "always": true,
+          "method": "OPTIONS",
+          "url": "/testapi"
+        },
+        "conf": {
+          "someconfigkey": "value"
+        }
+      }
+    }
+  },
   "automatic": {
-    "fqdn": "dev-generic-api-cluster-1d.priv.evertrue.com",
+    "fqdn": "dev-generic-api-cluster-1d.local",
     "ipaddress": "10.0.103.253",
     "recipes": [
       "et_generic_api_cluster::default"
